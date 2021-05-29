@@ -5,7 +5,7 @@ from olink.core.node import BaseNode
 from olink.core.protocol import Protocol
 
 
-class InvokeReplyArg(ProtocolType):
+class InvokeReplyArg:
     def __init__(self, name: str, value: Any):
         self.name = name
         self.value = value
@@ -33,6 +33,9 @@ class IObjectSink(ProtocolType):
 class SinkToClientEntry:
     sink: IObjectSink = None
     node: "ClientNode" = None
+    def __init__(self, sink=None):
+        self.sink = sink
+        self.node = None
 
 
 class ClientRegistry(Base):
@@ -46,12 +49,7 @@ class ClientRegistry(Base):
                 entry.node = None
 
     def link_client_node(self, name: str, node: "ClientNode"):
-        resource = Name.resource_from_name(name)
-        self.init_entry(resource)
-        if not self.entries[resource].node:
-            self.entries[resource].node = node
-        else:
-            self.emit_log(LogLevel.DEBUG, f"link node failed, sink has already a node: {resource}")
+        self.entry(name).node = node
 
     def unlink_client_node(self, name: str, node: "ClientNode"):
         resource = Name.resource_from_name(name)
@@ -62,55 +60,30 @@ class ClientRegistry(Base):
                 self.emit_log(LogLevel.DEBUG, f"unlink node failed, not the same node: {resource}")
 
     def add_object_sink(self, sink: IObjectSink) -> "ClientNode":
-        resource = Name.resource_from_name(sink.olink_object_name())
-        self.init_entry(resource)
-        if not self.entries[resource].sink:
-            self.entries[resource].sink = sink
-        else:
-            self.emit_log(LogLevel.DEBUG, f"add object sink failed: sink already added: {resource}")
-        return self.entries[resource].node
+        name = sink.olink_object_name()
+        self.entry(name).sink = sink
 
     def remove_object_sink(self, sink: IObjectSink):
-        resource = Name.resource_from_name(sink.olink_object_name())
-        if self.entries[resource].sink:
-            del self.entries[resource]
-        else:
-            self.emit_log(LogLevel.DEBUG, f"remove object sink failed: no sink to remove {resource}")
+        name = sink.olink_object_name()
+        self.remove_entry(name)
         
     def get_object_sink(self, name: str) -> Optional[IObjectSink]:
-        resource = Name.resource_from_name(name)
-        if resource in self.entries:
-            sink = self.entries[resource].sink
-            if not sink:
-                self.emit_log(LogLevel.DEBUG, f"no sink attached {resource}")
-            return sink
-        else:
-            self.emit_log(LogLevel.DEBUG, f"no resource: {resource}")
-        return None
+        return self.entry(name).sink
 
     def get_client_node(self, name: str) -> Optional["ClientNode"]:
-        resource = Name.resource_from_name(name)
-        if resource in self.entries:
-            node = self.entries[resource].node
-            if not node:
-                self.emit_log(LogLevel.DEBUG, f"no node attached {resource}")
-            return node
-        else:
-            self.emit_log(LogLevel.DEBUG, f"no resource: {resource}")
-        return None
+        return self.entry(name).node
 
     def entry(self, name: str) -> SinkToClientEntry:
         resource = Name.resource_from_name(name)
+        if not resource in self.entries:
+            self.emit_log(LogLevel.DEBUG, f"add new resource: {resource}")
+            self.entries[resource] = SinkToClientEntry()
         return self.entries[resource]
 
-    def has_entry(self, name: str) -> bool:
+    def remove_entry(self, name: str) -> None:
         resource = Name.resource_from_name(name)
-        return resource in self.entries
+        del self.entries[resource]
 
-    def init_entry(self, name: str):
-        resource = Name.resource_from_name(name)
-        if resource not in self.entries:
-            self.entries[resource] = SinkToClientEntry()
 
     
 

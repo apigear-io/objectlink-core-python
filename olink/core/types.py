@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import IntEnum
 from typing import Any, Callable
 from typing import Protocol as ProptocolType
 import json
 
-class MsgType(Enum):
+class MsgType(IntEnum):
     LINK = 10,
     INIT = 11,
     UNLINK = 12,
@@ -14,7 +14,7 @@ class MsgType(Enum):
     SIGNAL = 40,
     ERROR = 90,
 
-class MessageFormat(Enum):
+class MessageFormat(IntEnum):
     JSON = 1,
     BSON = 2,
     MSGPACK = 3,
@@ -26,7 +26,7 @@ class Name:
         return name.split('/')[0]
     @staticmethod
     def path_from_name(name: str) -> str:
-        return name.split('/')[:-1]
+        return name.split('/')[-1]
     @staticmethod
     def has_path(name: str) -> bool:
         return '/' in name
@@ -39,9 +39,9 @@ class MessageConverter:
     format: MessageFormat = MessageFormat.JSON
     def __init__(self, format: MessageFormat):
         self.format = format
-    def from_string(message: str) -> list[Any]:
+    def from_string(self, message: str) -> list[Any]:
         return json.loads(message)
-    def to_string(data: list[Any]) -> str:
+    def to_string(self, data: list[Any]) -> str:
         return json.dumps(data)
 
 WriteMessageFunc = Callable[[str], None]
@@ -64,7 +64,7 @@ class ILogger(ProptocolType):
 class Base:
     log_func: WriteLogFunc = None
 
-    def onLog(self, func: WriteLogFunc):
+    def on_log(self, func: WriteLogFunc):
         self.log_func = func
 
     def emit_log(self, level: LogLevel, msg: str):

@@ -3,31 +3,31 @@ from typing import Protocol as ProptocolType
 from .types import Base, LogLevel, MsgType
 
 class IProtocolListener(ProptocolType):
-    def handle_link(name: str) -> None:
+    def handle_link(self, name: str) -> None:
         raise NotImplementedError()
 
-    def handle_unlink(name: str) -> None:
+    def handle_unlink(self, name: str) -> None:
         raise NotImplementedError()
 
-    def handle_init(name: str, props: object) -> None:
+    def handle_init(self, name: str, props: object) -> None:
         raise NotImplementedError()
 
-    def handle_set_property(name: str, value: Any) -> None:
+    def handle_set_property(self, name: str, value: Any) -> None:
         raise NotImplementedError()
 
-    def handle_property_change(name: str, value: Any) -> None:
+    def handle_property_change(self, name: str, value: Any) -> None:
         raise NotImplementedError()
 
-    def handle_invoke(id: int, name: str, args: list[Any]) -> None:
+    def handle_invoke(self, id: int, name: str, args: list[Any]) -> None:
         raise NotImplementedError()
 
-    def handle_invoke_reply(id: int, name: str, value: Any) -> None:
+    def handle_invoke_reply(self, id: int, name: str, value: Any) -> None:
         raise NotImplementedError()
 
-    def handle_signal(name: str, args: Any) -> None:
+    def handle_signal(self, name: str, args: Any) -> None:
         raise NotImplementedError()
 
-    def handle_error(msgType: int, id: int, error: str) -> None:
+    def handle_error(self, msgType: int, id: int, error: str) -> None:
         raise NotImplementedError()
 
 class Protocol(Base):

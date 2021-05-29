@@ -14,7 +14,7 @@ class MockSink(IObjectSink):
     def invoke(self, name: str, args: list[Any]):
         if self.node:
             def func(arg: InvokeReplyArg):
-                self.events.append({'type': 'invoke', 'name': arg.name, 'value': arg.value})
+                self.events.append({'type': 'invoke-reply', 'name': arg.name, 'value': arg.value})
             self.node.invoke_remote(name, args, func)
     
     def olink_object_name(self) -> str:
@@ -23,8 +23,8 @@ class MockSink(IObjectSink):
     def olink_on_signal(self, name: str, args: list[Any]) -> None:
         self.events.append({'type': 'signal', 'name': name, 'args': args})
 
-    def olink_property_change(self, name: str, value: Any) -> None:
-        path = Name.pathFromName(name)
+    def olink_on_property_changed(self, name: str, value: Any) -> None:
+        path = Name.path_from_name(name)
         self.events.append({ 'type': 'property_change', 'name': name, 'value': value})
         self.properties[path] = value
 
