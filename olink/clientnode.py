@@ -48,7 +48,7 @@ class ClientRegistry(Base):
             if entry.node is node:
                 entry.node = None
 
-    def link_client_node(self, name: str, node: "ClientNode"):
+    def link_client_node(self, name: str, node: "ClientNode"):        
         self.entry(name).node = node
 
     def unlink_client_node(self, name: str, node: "ClientNode"):
@@ -61,7 +61,9 @@ class ClientRegistry(Base):
 
     def add_object_sink(self, sink: IObjectSink) -> "ClientNode":
         name = sink.olink_object_name()
-        self.entry(name).sink = sink
+        entry = self.entry(name)
+        entry.sink = sink
+        return entry.node
 
     def remove_object_sink(self, sink: IObjectSink):
         name = sink.olink_object_name()
