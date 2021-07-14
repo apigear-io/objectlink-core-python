@@ -6,5 +6,16 @@ It supports distributed properties, asynchronous method invokation as also serve
 
 It is designed to wort together with ApiGear Object Model to generate complete client and server side APIs.
 
+# Install for testing
+
+This will install the package as editable python package, which can be used for local development.
+
+```
+pip install -e .
+```
+
+# Publish package
+
+TBD
 
 
