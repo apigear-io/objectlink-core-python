@@ -9,7 +9,7 @@ class Counter(IObjectSink):
     count = 0
     client = None
     def __init__(self):
-        self.client = ClientNode.add_object_sink(self)
+        self.client = ClientNode.register_sink(self)
         print('client', self.client)
 
     def increment(self):

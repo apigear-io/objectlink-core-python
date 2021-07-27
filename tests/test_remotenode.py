@@ -1,48 +1,53 @@
-from olink.remotenode import RemoteNode
+from olink.remotenode import RemoteNode, get_remote_registry
 from olink.mocks.mocksource import MockSource
 
 name = 'demo.Counter'
 source = MockSource(name)
 remote = RemoteNode()
-r = remote.registry()
+remote_registry = get_remote_registry()
 
 def reset():
     source.clear()
-    r.clear()    
+    remote_registry.clear()    
 
 def test_add_source():
     reset()
-    assert len(r.get_remote_nodes(name)) == 0
-    RemoteNode.add_object_source(source)
-    assert r.get_object_source(name) == source
-    assert len(r.get_remote_nodes(name)) == 0
+    assert len(remote_registry.get_nodes(name)) == 0
+    remote.register_source(source)
+    assert remote_registry.get_source(name) == source
+    assert len(remote_registry.get_nodes(name)) == 0
 
 def test_remove_source():
     reset()
-    RemoteNode.add_object_source(source)
-    assert r.get_object_source(name) == source
-    RemoteNode.remove_object_source(source)
-    assert(r.get_object_source(name) == None)
+    RemoteNode.register_source(source)
+    assert remote_registry.get_source(name) == source
+    RemoteNode.unregister_source(source)
+    assert(remote_registry.get_source(name) == None)
 
 def test_link_node_to_source():
     reset()
-    RemoteNode.add_object_source(source)
-    assert r.get_remote_nodes(name) == set()
-    r.link_remote_node(name, remote)
-    assert r.get_remote_nodes(name) == {remote}
+    RemoteNode.register_source(source)
+    assert remote_registry.get_nodes(name) == set()
+    remote_registry.add_node_to_source(name, remote)
+    assert remote_registry.get_nodes(name) == {remote}
 
 def test_unlink_node_from_source():
     reset()
-    RemoteNode.add_object_source(source)
-    r.link_remote_node(name, remote)
-    assert r.get_remote_nodes(name) == set([remote])    
-    r.unlink_remote_node(name, remote)
-    assert r.get_remote_nodes(name) == set()    
+    RemoteNode.register_source(source)
+    remote_registry.add_node_to_source(name, remote)
+    assert remote_registry.get_nodes(name) == set([remote])    
+    remote_registry.remove_node_from_source(name, remote)
+    assert remote_registry.get_nodes(name) == set()    
 
 def test_detach_node_from_all_sources():
     reset()
-    RemoteNode.add_object_source(source)
-    r.link_remote_node(name, remote)
-    assert r.get_remote_nodes(name) == set([remote])    
+    RemoteNode.register_source(source)
+    remote_registry.add_node_to_source(name, remote)
+    assert remote_registry.get_nodes(name) == set([remote])    
     remote.detach()
-    assert r.get_remote_nodes(name) == set()    
+    assert remote_registry.get_nodes(name) == set()    
+
+def test_get_registry():
+    reset()
+    reg = remote.registry()
+    assert reg == remote_registry

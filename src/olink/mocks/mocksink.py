@@ -9,7 +9,7 @@ class MockSink(IObjectSink):
     properties: dict[str, Any] = {}
     def __init__(self, name: str):
         self.name = name
-        self.node = ClientNode.add_object_sink(self)
+        self.node = ClientNode.register_sink(self)
 
     def invoke(self, name: str, args: list[Any]):
         if self.node:
