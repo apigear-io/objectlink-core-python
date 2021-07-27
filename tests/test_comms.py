@@ -18,6 +18,8 @@ client.on_write(lambda msg: remote.handle_message(msg))
 remote.on_write(lambda msg: client.handle_message(msg))
 sink = MockSink(name)
 source = MockSource(name)
+RemoteNode.register_source(source)
+
 
 def reset():
     sink.clear()
@@ -25,9 +27,9 @@ def reset():
 
 def test_client_link():
     client.detach()
-    assert client.registry().get_client_node(name) == None
+    assert client.registry().get_node(name) == None
     client.link_remote(name)
-    assert client.registry().get_client_node(name) == client
+    assert client.registry().get_node(name) == client
     assert len(sink.events) == 1
     assert sink.events[0] == { 'type': 'init', 'name': name, 'props': {}}
 

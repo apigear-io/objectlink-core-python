@@ -21,7 +21,7 @@ class CounterAdapter(IObjectSource):
     node: RemoteNode = None
     def __init__(self, impl):
         self.impl = impl
-        RemoteNode.add_object_source(self)
+        RemoteNode.register_source(self)
 
     def olink_object_name(self):
         return 'demo.Counter'

@@ -10,15 +10,12 @@ class MockSource(IObjectSource):
 
     def __init__(self, name: str):
         self.name = name
-        RemoteNode.add_object_source(self)
 
     def set_property(self, name: str, value: Any):
-        if self.node:
-            self.node.notify_property_change(name, value)
+        RemoteNode.notify_property_change(name, value)
 
     def notify_signal(self, name: str, args: list[Any]):
-        if self.node:
-            self.node.notify_signal(name, args)
+        RemoteNode.notify_signal(name, args)
 
     def olink_object_name(self) -> str:
         return self.name
@@ -33,14 +30,12 @@ class MockSource(IObjectSource):
         if not path in self.properties:
             # assign new value
             self.properties[path] = value
-            if self.node:
-                self.node.notify_property_change(name, value)
+            RemoteNode.notify_property_change(name, value)
         else:
             # update existing value
             if not self.properties[path] == value:
                 self.properties[path] = value
-                if self.node:
-                    self.node.notify_property_change(name, value)
+                RemoteNode.notify_property_change(name, value)
     
     def olink_linked(self, name: str, node: RemoteNode):
         self.events.append({'type': 'linked', 'name': name})
