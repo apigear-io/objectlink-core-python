@@ -2,12 +2,14 @@ from olink.core.protocol import Protocol
 from olink.core.types import MsgType
 
 name = 'demo.Calc'
-props = { 'count':  1}
+props = {'count':  1}
 value = 1
 id = 1
 args = [1, 2]
 msgType = MsgType.INVOKE
 error = "error"
+
+
 def test_messages():
     msg = Protocol.link_message(name)
     assert msg == [MsgType.LINK, name]
