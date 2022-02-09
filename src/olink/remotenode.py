@@ -4,7 +4,9 @@ from olink.core.node import BaseNode
 
 from typing import Any, Protocol as ProtocolType
 
+
 class IObjectSource(ProtocolType):
+    # interface for object sources
     def olink_object_name() -> str:
         # returns the object name
         raise NotImplementedError()
@@ -28,6 +30,7 @@ class IObjectSource(ProtocolType):
 
 
 class SourceToNodeEntry:
+    # entry in the remote registry
     source: IObjectSource = None
     nodes: set["RemoteNode"] = set()
 
@@ -36,29 +39,31 @@ class SourceToNodeEntry:
         self.nodes = set()
 
 
-
 class RemoteRegistry(Base):
+    # registry of remote sources
+    # links sources to nodes
     entries: dict[str, SourceToNodeEntry] = {}
 
     def add_source(self, source: IObjectSource):
         # add a source to registry by object name
         name = source.olink_object_name()
-        self.emit_log(LogLevel.DEBUG, f"RemoteRegistry.add_object_source: {name}")
+        self.emit_log(LogLevel.DEBUG,
+                      f"RemoteRegistry.add_object_source: {name}")
         self._entry(name).source = source
 
     def remove_source(self, source: IObjectSource):
         # remove the given source from the registry
         name = source.olink_object_name()
         self._remove_entry(name)
-    
+
     def get_source(self, name: str):
         # return the source for the given name
         return self._entry(name).source
-    
+
     def get_nodes(self, name: str):
         # return nodes attached to the named source
         return self._entry(name).nodes
-    
+
     def remove_node(self, node: "RemoteNode"):
         # remove the given node from the registry
         self.emit_log(LogLevel.DEBUG, "RemoteRegistry.detach_remote_node")
@@ -88,8 +93,8 @@ class RemoteRegistry(Base):
         if resource in self.entries:
             del self.entries[resource]
         else:
-            self.emit_log(LogLevel.DEBUG, f'remove resource failed, resource not exists: {resource}')
-
+            self.emit_log(
+                LogLevel.DEBUG, f'remove resource failed, resource not exists: {resource}')
 
     def _has_entry(self, name: str) -> SourceToNodeEntry:
         # checks if the registry has an entry for the given name
@@ -102,25 +107,27 @@ class RemoteRegistry(Base):
         if resource in self.entries:
             self.entries[resource] = SourceToNodeEntry()
 
-
-
     def clear(self):
         self.entries = {}
 
+
 _registry = RemoteRegistry()
 
-def get_remote_registry() -> RemoteRegistry: 
+
+def get_remote_registry() -> RemoteRegistry:
+    # returns the remote registry
     return _registry
 
+
 class RemoteNode(BaseNode):
+    # a remote node is a node that is linked to a remote source
     def __init__(self):
-        # initisalize node and attaches this node to registry
+        # initialise node and attaches this node to registry
         super().__init__()
 
     def detach(self):
         # detach this node from registry
         self.registry().remove_node(self)
-
 
     def handle_link(self, name: str) -> None:
         # handle link message from client node
@@ -131,7 +138,7 @@ class RemoteNode(BaseNode):
             source.olink_linked(name, self)
             props = source.olink_collect_properties()
             self.emit_write(Protocol.init_message(name, props))
-    
+
     def handle_unlink(self, name: str):
         # unlinks names source from registry
         source = self.get_source(name)
@@ -168,7 +175,6 @@ class RemoteNode(BaseNode):
         # add object source to registry
         return get_remote_registry().add_source(source)
 
-
     @staticmethod
     def unregister_source(source: IObjectSource):
         # remove object source from registry
@@ -185,5 +191,3 @@ class RemoteNode(BaseNode):
         # notify signal to all named client nodes
         for node in get_remote_registry().get_nodes(name):
             node.emit_write(Protocol.signal_message(name, args))
-    
-

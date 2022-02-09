@@ -12,9 +12,12 @@ class InvokeReplyArg:
     name: str
     value: Any
 
+
 InvokeReplyFunc = Callable[[InvokeReplyArg], None]
 
+
 class IObjectSink(ProtocolType):
+    # interface for object sinks
     def olink_object_name() -> str:
         # return object name
         raise NotImplementedError()
@@ -35,9 +38,12 @@ class IObjectSink(ProtocolType):
         # called when sink is released
         raise NotImplementedError()
 
+
 class SinkToClientEntry:
+    # entry in the client registry
     sink: IObjectSink = None
     node: "ClientNode" = None
+
     def __init__(self, sink=None):
         self.sink = sink
         self.node = None
@@ -53,7 +59,7 @@ class ClientRegistry(Base):
             if entry.node is node:
                 entry.node = None
 
-    def add_node_to_sink(self, name: str, node: "ClientNode"):        
+    def add_node_to_sink(self, name: str, node: "ClientNode"):
         # add not to named sink
         self._entry(name).node = node
 
@@ -64,7 +70,8 @@ class ClientRegistry(Base):
             if self.entries[resource].node is node:
                 self.entries[resource].node = None
             else:
-                self.emit_log(LogLevel.DEBUG, f"unlink node failed, not the same node: {resource}")
+                self.emit_log(
+                    LogLevel.DEBUG, f"unlink node failed, not the same node: {resource}")
 
     def register_sink(self, sink: IObjectSink) -> "ClientNode":
         # register sink using object name
@@ -77,7 +84,7 @@ class ClientRegistry(Base):
         # unregister sink using object name
         name = sink.olink_object_name()
         self._remove_entry(name)
-        
+
     def get_sink(self, name: str) -> Optional[IObjectSink]:
         # get sink using name
         return self._entry(name).sink
@@ -103,10 +110,14 @@ class ClientRegistry(Base):
 # global client registry
 _registry = ClientRegistry()
 
+
 def get_client_registry() -> ClientRegistry:
+    # get global client registry
     return _registry
 
+
 class ClientNode(BaseNode):
+    # client side node
     invokes_pending: dict[int, InvokeReplyFunc] = {}
     requestId = 0
 
@@ -121,7 +132,8 @@ class ClientNode(BaseNode):
         return self.requestId
 
     def invoke_remote(self, name: str, args: list[Any], func: Optional[InvokeReplyFunc]) -> None:
-        self.emit_log(LogLevel.DEBUG, f"ClientNode.invoke_remote: {name} {args}")
+        self.emit_log(LogLevel.DEBUG,
+                      f"ClientNode.invoke_remote: {name} {args}")
         request_id = self.next_request_id()
         if func:
             self.invokes_pending[request_id] = func
@@ -129,7 +141,8 @@ class ClientNode(BaseNode):
 
     def set_remote_property(self, name: str, value: Any) -> None:
         # send remote propertymessage
-        self.emit_log(LogLevel.DEBUG, f"ClientNode.set_remote_property: {name} {value}")   
+        self.emit_log(LogLevel.DEBUG,
+                      f"ClientNode.set_remote_property: {name} {value}")
         self.emit_write(Protocol.set_property_message(name, value))
 
     def link_node(self, name: str):
@@ -144,7 +157,7 @@ class ClientNode(BaseNode):
     def register_sink(sink: IObjectSink) -> Optional["ClientNode"]:
         # register sink to registry
         return get_client_registry().register_sink(sink)
-    
+
     @staticmethod
     def unregister_sink(sink: IObjectSink) -> None:
         # unregister sink from registry
@@ -152,10 +165,11 @@ class ClientNode(BaseNode):
 
     @staticmethod
     def get_sink(name: str) -> Optional[IObjectSink]:
+        # get sink from registry
         return get_client_registry().get_sink(name)
 
-    def link_remote(self, name: str):      
-        # register this node from sink and send a link message  
+    def link_remote(self, name: str):
+        # register this node from sink and send a link message
         self.emit_log(LogLevel.DEBUG, f"ClientNode.linkRemote: {name}")
         self.registry().add_node_to_sink(name, self)
         self.emit_write(Protocol.link_message(name))
@@ -175,14 +189,16 @@ class ClientNode(BaseNode):
 
     def handle_property_change(self, name: str, value: Any) -> None:
         # handle property change message from source
-        self.emit_log(LogLevel.DEBUG, f"ClientNode.handle_property_change: {name}")
-        sink =self.get_sink(name)
+        self.emit_log(LogLevel.DEBUG,
+                      f"ClientNode.handle_property_change: {name}")
+        sink = self.get_sink(name)
         if sink:
             sink.olink_on_property_changed(name, value)
 
     def handle_invoke_reply(self, id: int, name: str, value: Any) -> None:
         # handle invoke reply message from source
-        self.emit_log(LogLevel.DEBUG, f"ClientNode.handle_invoke_reply: {id} {name} {value}")
+        self.emit_log(LogLevel.DEBUG,
+                      f"ClientNode.handle_invoke_reply: {id} {name} {value}")
         if id in self.invokes_pending:
             func = self.invokes_pending[id]
             if func:
@@ -194,14 +210,13 @@ class ClientNode(BaseNode):
 
     def handle_signal(self, name: str, args: list[Any]) -> None:
         # handle signal message from source
-        self.emit_log(LogLevel.DEBUG, f"ClientNode.handle_signal: {name} {args}")
+        self.emit_log(LogLevel.DEBUG,
+                      f"ClientNode.handle_signal: {name} {args}")
         sink = self.get_sink(name)
         if sink:
             sink.olink_on_signal(name, args)
 
     def handle_error(self, msgType: MsgType, id: int, error: str):
         # handle error message from source
-        self.emit_log(LogLevel.DEBUG, f"ClientNode.handle_error: {msgType} {id} {error}")
-
-
-    
+        self.emit_log(LogLevel.DEBUG,
+                      f"ClientNode.handle_error: {msgType} {id} {error}")

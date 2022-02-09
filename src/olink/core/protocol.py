@@ -2,40 +2,53 @@ from typing import Any
 from typing import Protocol as ProptocolType
 from .types import Base, LogLevel, MsgType
 
+
 class IProtocolListener(ProptocolType):
+    # interface for protocol listeners
     def handle_link(self, name: str) -> None:
+        # called when a link is created
         raise NotImplementedError()
 
     def handle_unlink(self, name: str) -> None:
+        # called when a link is released
         raise NotImplementedError()
 
     def handle_init(self, name: str, props: object) -> None:
+        # called when a node is initialized
         raise NotImplementedError()
 
     def handle_set_property(self, name: str, value: Any) -> None:
+        # called when a property is set
         raise NotImplementedError()
 
     def handle_property_change(self, name: str, value: Any) -> None:
+        # called when a property is changed
         raise NotImplementedError()
 
     def handle_invoke(self, id: int, name: str, args: list[Any]) -> None:
+        # called when a node invokes a method
         raise NotImplementedError()
 
     def handle_invoke_reply(self, id: int, name: str, value: Any) -> None:
+        # called when a node replies to an invoke
         raise NotImplementedError()
 
     def handle_signal(self, name: str, args: Any) -> None:
+        # called when a signal is emitted
         raise NotImplementedError()
 
     def handle_error(self, msgType: int, id: int, error: str) -> None:
+        # called when an error occurs
         raise NotImplementedError()
+
 
 class Protocol(Base):
     listener: IProtocolListener = None
-    def __init__(self, listener: IProtocolListener):   
+
+    def __init__(self, listener: IProtocolListener):
         super()
         self.listener = listener
-    
+
     @staticmethod
     def link_message(name: str) -> list[Any]:
         """links remote object"""
@@ -44,7 +57,8 @@ class Protocol(Base):
     @staticmethod
     def init_message(name: str, props: object) -> list[Any]:
         return [MsgType.INIT, name, props]
-    @staticmethod    
+
+    @staticmethod
     def unlink_message(name: str) -> list[Any]:
         """unlinks remote object"""
         return [MsgType.UNLINK, name]
@@ -110,13 +124,7 @@ class Protocol(Base):
             _, msgType, id, error = msg
             self.listener.handle_error(msgType, id, error)
         else:
-            self.emit_log(LogLevel.DEBUG, f"not supported message type: {msgType}")
+            self.emit_log(LogLevel.DEBUG,
+                          f"not supported message type: {msgType}")
             return False
         return True
-
-
-    
-
-    
-
-

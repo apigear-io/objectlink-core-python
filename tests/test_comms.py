@@ -25,13 +25,14 @@ def reset():
     sink.clear()
     source.clear()
 
+
 def test_client_link():
     client.detach()
     assert client.registry().get_node(name) == None
     client.link_remote(name)
     assert client.registry().get_node(name) == client
     assert len(sink.events) == 1
-    assert sink.events[0] == { 'type': 'init', 'name': name, 'props': {}}
+    assert sink.events[0] == {'type': 'init', 'name': name, 'props': {}}
 
 
 def test_client_set_property():
@@ -40,7 +41,9 @@ def test_client_set_property():
     assert len(sink.events) == 1
     client.set_remote_property(propName, propValue)
     assert len(sink.events) == 2
-    assert sink.events[1] == { 'type': 'property_change', 'name': propName, 'value': propValue }
+    assert sink.events[1] == {
+        'type': 'property_change', 'name': propName, 'value': propValue}
+
 
 def test_client_invoke():
     reset()
@@ -48,7 +51,9 @@ def test_client_invoke():
     assert len(sink.events) == 1
     sink.invoke(invokeName, invokeArgs)
     assert len(sink.events) == 2
-    assert sink.events[1] == { 'type': 'invoke-reply', 'name': invokeName, 'value': invokeName }
+    assert sink.events[1] == {'type': 'invoke-reply',
+                              'name': invokeName, 'value': invokeName}
+
 
 def test_remote_signal():
     reset()
@@ -56,7 +61,8 @@ def test_remote_signal():
     assert len(sink.events) == 1
     source.notify_signal(sigName, sigArgs)
     assert len(sink.events) == 2
-    assert sink.events[1] == { 'type': 'signal', 'name': sigName, 'args': sigArgs }
+    assert sink.events[1] == {'type': 'signal',
+                              'name': sigName, 'args': sigArgs}
 
 
 def test_remote_set_property():
@@ -65,4 +71,5 @@ def test_remote_set_property():
     assert len(sink.events) == 1
     source.set_property(propName, propValue)
     assert len(sink.events) == 2
-    assert sink.events[1] == { 'type': 'property_change', 'name': propName, 'value': propValue }
+    assert sink.events[1] == {
+        'type': 'property_change', 'name': propName, 'value': propValue}

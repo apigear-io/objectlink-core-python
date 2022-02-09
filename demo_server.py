@@ -13,38 +13,46 @@ from olink.remotenode import IObjectSource, RemoteNode
 class Counter:
     count = 0
     _node: RemoteNode
+
     def increment(self):
         self.count += 1
-        self._node.notify_property_change('demo.Counter/count', self.count)
+        # notify all registered clients
+        RemoteNode.notify_property_change('demo.Counter/count', self.count)
+
 
 class CounterAdapter(IObjectSource):
     node: RemoteNode = None
+
     def __init__(self, impl):
         self.impl = impl
-        RemoteNode.add_object_source(self)
+        # need to register this source with the registry
+        RemoteNode.register_source(self)
 
     def olink_object_name(self):
+        # name this source is registered under
         return 'demo.Counter'
 
     def olink_invoke(self, name: str, args: list[Any]) -> Any:
+        # called on incoming invoke message
         path = Name.path_from_name(name)
         func = getattr(self.impl, path)
         func()
 
     def olink_set_property(self, name: str, value: Any):
+        # called on incoming set property message
         path = Name.path_from_name(name)
         setattr(self, self.impl, value)
 
     def olink_linked(self, name: str, node: "RemoteNode"):
+        # called when a remote node is linked to this node
         self.impl._node = node
 
     def olink_collect_properties(self) -> object:
         return {k: getattr(self.impl, k) for k in ['count']}
 
+
 counter = Counter()
 adapter = CounterAdapter(counter)
-
-
 
 
 class RemoteEndpoint(WebSocketEndpoint):
@@ -59,7 +67,7 @@ class RemoteEndpoint(WebSocketEndpoint):
             msg = await self.queue.get()
             print('send', msg)
             await ws.send_text(msg)
-            self.queue.task_done()        
+            self.queue.task_done()
 
     async def on_connect(self, ws: WebSocket):
         print('on_connect')
@@ -71,7 +79,6 @@ class RemoteEndpoint(WebSocketEndpoint):
         self.node.on_write(writer)
         await super().on_connect(ws)
 
-
     async def on_receive(self, ws: WebSocket, data: Any) -> None:
         print('on_receive', data)
         self.node.handle_message(data)
@@ -80,7 +87,6 @@ class RemoteEndpoint(WebSocketEndpoint):
         await super().on_disconnect(websocket, close_code)
         self.node.on_write(None)
         await self.queue.join()
-
 
 
 routes = [
