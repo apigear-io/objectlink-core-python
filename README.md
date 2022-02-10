@@ -33,5 +33,5 @@ pip3 install uvicorn
 and run using
 
 ```
-uvicorn demo:app --port=8080
+uvicorn demo_server:app --port=8080
 ```
