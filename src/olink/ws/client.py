@@ -1,13 +1,12 @@
 import asyncio
 import websockets as ws
-from .emitter import Emitter
+from olink.client import ClientNode
 
-
-class Client:
+class Connection:
     send_queue = asyncio.Queue()
     recv_queue = asyncio.Queue()
     node = None
-    def __init__(self, node):
+    def __init__(self, node=ClientNode()):
         self.node = node
 
     def send(self, msg):

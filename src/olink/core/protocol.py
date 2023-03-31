@@ -1,9 +1,9 @@
 from typing import Any
-from typing import Protocol as ProptocolType
+from typing import Protocol as ProtocolType
 from .types import Base, LogLevel, MsgType
 
 
-class IProtocolListener(ProptocolType):
+class IProtocolListener(ProtocolType):
     # interface for protocol listeners
     def handle_link(self, name: str) -> None:
         # called when a link is created

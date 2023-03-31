@@ -1,6 +1,6 @@
 from olink.core.types import Name
 from typing import Any, Optional
-from olink.clientnode import ClientNode, IObjectSink, InvokeReplyArg
+from olink.client import ClientNode, IObjectSink, InvokeReplyArg
 
 class MockSink(IObjectSink):
     name: str

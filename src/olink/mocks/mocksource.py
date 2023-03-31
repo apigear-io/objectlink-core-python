@@ -1,6 +1,6 @@
 from olink.core.types import Name
 from typing import Any
-from olink.remotenode import IObjectSource, RemoteNode
+from olink.remote import IObjectSource, RemoteNode
 
 class MockSource(IObjectSource):
     name: str
@@ -21,7 +21,7 @@ class MockSource(IObjectSource):
         return self.name
 
     def olink_invoke(self, name: str, args: list[Any]):
-        self.events.append({ 'type': 'invole', 'name': name, 'args': args })
+        self.events.append({ 'type': 'invoke', 'name': name, 'args': args })
         return name
 
     def olink_set_property(self, name: str, value: Any):
