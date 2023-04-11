@@ -1,6 +1,7 @@
 from typing import Any
 from typing import Protocol as ProtocolType
 from .types import Base, LogLevel, MsgType
+import types
 
 
 class IProtocolListener(ProtocolType):
@@ -17,23 +18,23 @@ class IProtocolListener(ProtocolType):
         # called when a node is initialized
         raise NotImplementedError()
 
-    def handle_set_property(self, name: str, value: Any) -> None:
+    def handle_set_property(self, name: str, value) -> None:
         # called when a property is set
         raise NotImplementedError()
 
-    def handle_property_change(self, name: str, value: Any) -> None:
+    def handle_property_change(self, name: str, value) -> None:
         # called when a property is changed
         raise NotImplementedError()
 
-    def handle_invoke(self, id: int, name: str, args: list[Any]) -> None:
+    def handle_invoke(self, id: int, name: str, args) -> None:
         # called when a node invokes a method
         raise NotImplementedError()
 
-    def handle_invoke_reply(self, id: int, name: str, value: Any) -> None:
+    def handle_invoke_reply(self, id: int, name: str, value) -> None:
         # called when a node replies to an invoke
         raise NotImplementedError()
 
-    def handle_signal(self, name: str, args: Any) -> None:
+    def handle_signal(self, name: str, args) -> None:
         # called when a signal is emitted
         raise NotImplementedError()
 
@@ -50,48 +51,48 @@ class Protocol(Base):
         self.listener = listener
 
     @staticmethod
-    def link_message(name: str) -> list[Any]:
+    def link_message(name: str):
         """links remote object"""
         return [MsgType.LINK, name]
 
     @staticmethod
-    def init_message(name: str, props: object) -> list[Any]:
+    def init_message(name: str, props: object):
         return [MsgType.INIT, name, props]
 
     @staticmethod
-    def unlink_message(name: str) -> list[Any]:
+    def unlink_message(name: str):
         """unlinks remote object"""
         return [MsgType.UNLINK, name]
 
     @staticmethod
-    def set_property_message(name: str, value: Any) -> list[Any]:
+    def set_property_message(name: str, value):
         """set property on remote object"""
         return [MsgType.SET_PROPERTY, name, value]
 
     @staticmethod
-    def property_change_message(name: str, value: Any) -> list[Any]:
+    def property_change_message(name: str, value):
         """signal property change to the client linked to the remote objects"""
         return [MsgType.PROPERTY_CHANGE, name, value]
 
     @staticmethod
-    def invoke_message(id: int, name: str, args: list[Any]) -> list[Any]:
+    def invoke_message(id: int, name: str, args):
         """invoke an operation on a remote object"""
         return [MsgType.INVOKE, id, name, args]
 
     @staticmethod
-    def invoke_reply_message(id: int, name: str, value: Any) -> list[Any]:
+    def invoke_reply_message(id: int, name: str):
         """reply on an  invoke message"""
         return [MsgType.INVOKE_REPLY, id, name, value]
 
     @staticmethod
-    def signal_message(name: str, args: list[Any]) -> list[Any]:
+    def signal_message(name: str, args):
         return [MsgType.SIGNAL, name, args]
 
     @staticmethod
-    def error_message(msgType: MsgType, id: int, error: str) -> list[Any]:
+    def error_message(msgType: MsgType, id: int, error: str):
         return [MsgType.ERROR, msgType, id, error]
 
-    def handle_message(self, msg: list[Any]) -> bool:
+    def handle_message(self, msg) -> bool:
         if not self.listener:
             self.emit_log(LogLevel.DEBUG, "no listener installed")
             return False

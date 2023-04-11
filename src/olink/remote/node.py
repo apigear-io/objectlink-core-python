@@ -37,7 +37,7 @@ class RemoteNode(BaseNode):
         if source:
             source.olink_set_property(name, value)
 
-    def handle_invoke(self, id: int, name: str, args: list[Any]) -> None:
+    def handle_invoke(self, id: int, name: str, args) -> None:
         # handle invoke message from client node
         # calls invoke on source
         # returns invoke reply message to client node
@@ -72,7 +72,7 @@ class RemoteNode(BaseNode):
             node.emit_write(Protocol.property_change_message(name, value))
 
     @staticmethod
-    def notify_signal(name: str, args: list[Any]):
+    def notify_signal(name: str, args):
         # notify signal to all named client nodes
         for node in get_remote_registry().get_nodes(name):
             node.emit_write(Protocol.signal_message(name, args))

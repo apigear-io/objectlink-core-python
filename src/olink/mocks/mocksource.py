@@ -4,8 +4,8 @@ from olink.remote import IObjectSource, RemoteNode
 
 class MockSource(IObjectSource):
     name: str
-    events: list[Any] = []
-    properties: dict[str, Any] = {}
+    events = []
+    properties = {}
     node: RemoteNode = None
 
     def __init__(self, name: str):
@@ -14,13 +14,13 @@ class MockSource(IObjectSource):
     def set_property(self, name: str, value: Any):
         RemoteNode.notify_property_change(name, value)
 
-    def notify_signal(self, name: str, args: list[Any]):
+    def notify_signal(self, name: str, args):
         RemoteNode.notify_signal(name, args)
 
     def olink_object_name(self) -> str:
         return self.name
 
-    def olink_invoke(self, name: str, args: list[Any]):
+    def olink_invoke(self, name: str, args):
         self.events.append({ 'type': 'invoke', 'name': name, 'args': args })
         return name
 

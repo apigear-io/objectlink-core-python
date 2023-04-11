@@ -13,7 +13,7 @@ class SourceToNodeEntry:
 class RemoteRegistry(Base):
     # registry of remote sources
     # links sources to nodes
-    entries: dict[str, SourceToNodeEntry] = {}
+    entries = {}
 
     def add_source(self, source: IObjectSource):
         # add a source to registry by object name

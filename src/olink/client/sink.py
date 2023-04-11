@@ -34,7 +34,7 @@ class AbstractSink(IObjectSink):
         setattr(self, name, value)
         self.on_property_changed.fire(path, value)
 
-    def olink_on_signal(self, name: str, args: list[Any]):
+    def olink_on_signal(self, name: str, args):
         path = Name.path_from_name(name)
         hook = getattr(self, f'on_{path}')        
         hook.fire(*args)

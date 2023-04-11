@@ -6,7 +6,7 @@ class IObjectSink(ProtocolType):
         # return object name
         raise NotImplementedError()
 
-    def olink_on_signal(self, name: str, args: list[Any]) -> None:
+    def olink_on_signal(self, name: str, args) -> None:
         # called on signal message
         raise NotImplementedError()
 

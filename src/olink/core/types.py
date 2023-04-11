@@ -54,10 +54,10 @@ class MessageConverter:
     def __init__(self, format: MessageFormat):
         self.format = format
 
-    def from_string(self, message: str) -> list[Any]:
+    def from_string(self, message):
         return json.loads(message)
 
-    def to_string(self, data: list[Any]) -> str:
+    def to_string(self, data) -> str:
         return json.dumps(data)
 
 

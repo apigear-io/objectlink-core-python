@@ -18,7 +18,7 @@ class BaseNode(Base, IProtocolListener):
         # set the write function
         self.write_func = func
 
-    def emit_write(self, msg: list[Any]) -> None:
+    def emit_write(self, msg) -> None:
         # emit a message using the write function
         if self.write_func:
             data = self.converter.to_string(msg)

@@ -6,7 +6,7 @@ class IObjectSource(ProtocolType):
         # returns the object name
         raise NotImplementedError()
 
-    def olink_invoke(self, name: str, args: list[Any]):
+    def olink_invoke(self, name: str, args):
         # called on incoming invoke message
         # returns resulting value
         raise NotImplementedError()

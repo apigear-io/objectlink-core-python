@@ -13,12 +13,14 @@ class Connection:
         self.send_queue.put_nowait(msg)
 
     async def handle_send(self):
-        async for msg in self.send_queue:
+        while True:
+            msg = await self.send_queue.get()
             data = self.serializer.serialize(msg)
             await self.conn.send(data)
 
     async def handle_recv(self):
-        async for msg in self.recv_queue:
+        while True:
+            msg = await self.recv_queue.get()
             self.emitter.emit(msg.object, msg)
 
     async def recv(self):

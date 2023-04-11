@@ -17,7 +17,7 @@ InvokeReplyFunc = Callable[[InvokeReplyArg], None]
 
 class ClientNode(BaseNode):
     # client side node
-    invokes_pending: dict[int, InvokeReplyFunc] = {}
+    invokes_pending = {}
     requestId = 0
 
     def registry(self) -> ClientRegistry:
@@ -30,7 +30,7 @@ class ClientNode(BaseNode):
         self.requestId += 1
         return self.requestId
 
-    def invoke_remote(self, name: str, args: list[Any], func: Optional[InvokeReplyFunc]) -> None:
+    def invoke_remote(self, name: str, args, func: Optional[InvokeReplyFunc]) -> None:
         self.emit_log(LogLevel.DEBUG,
                       f"ClientNode.invoke_remote: {name} {args}")
         request_id = self.next_request_id()
@@ -107,7 +107,7 @@ class ClientNode(BaseNode):
         else:
             self.emit_log(LogLevel.DEBUG, f"no pending invoke: {id} {name}")
 
-    def handle_signal(self, name: str, args: list[Any]) -> None:
+    def handle_signal(self, name: str, args) -> None:
         # handle signal message from source
         self.emit_log(LogLevel.DEBUG,
                       f"ClientNode.handle_signal: {name} {args}")

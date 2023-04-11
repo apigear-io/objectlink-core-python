@@ -9,9 +9,9 @@ class RemotePipe:
     send_queue = asyncio.Queue()
     recv_queue = asyncio.Queue()
     node = RemoteNode()
-    def __init__(self, conn: ws.ClientConnection):
-        self.conn = conn
-        self.node.on_write(self._send)
+    # def __init__(self, conn: ws.ClientConnection):
+    #     self.conn = conn
+    #     self.node.on_write(self._send)
 
     def _send(self, data):
         self.send_queue.put_nowait(data)

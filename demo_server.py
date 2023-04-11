@@ -32,7 +32,7 @@ class CounterAdapter(IObjectSource):
         # name this source is registered under
         return 'demo.Counter'
 
-    def olink_invoke(self, name: str, args: list[Any]) -> Any:
+    def olink_invoke(self, name: str, args) -> Any:
         # called on incoming invoke message
         path = Name.path_from_name(name)
         func = getattr(self.impl, path)

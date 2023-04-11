@@ -14,7 +14,7 @@ class SourceAdapter(IObjectSource):
     def olink_object_name(self) -> str:
         return self.object_id
     
-    def olink_invoke(self, name: str, args: list[Any]) -> Any:
+    def olink_invoke(self, name: str) -> Any:
         path = Name.path_from_name(name)
         func = getattr(self.impl, path)
         try:

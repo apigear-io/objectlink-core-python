@@ -25,7 +25,7 @@ class CounterSink(IObjectSink):
         # return the name of the sink
         return 'demo.Counter'
 
-    def olink_on_signal(self, name: str, args: list[Any]):
+    def olink_on_signal(self, name: str, args):
         # handle the incoming signal from the remote source
         path = Name.path_from_name(name)
         print('on signal: %s: %s' % (path, args))

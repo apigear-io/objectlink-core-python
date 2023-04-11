@@ -4,14 +4,14 @@ from olink.client import ClientNode, IObjectSink, InvokeReplyArg
 
 class MockSink(IObjectSink):
     name: str
-    events: list[Any] = []
+    events = []
     node: Optional[ClientNode] = None
-    properties: dict[str, Any] = {}
+    properties = {}
     def __init__(self, name: str):
         self.name = name
         self.node = ClientNode.register_sink(self)
 
-    def invoke(self, name: str, args: list[Any]):
+    def invoke(self, name: str, args):
         if self.node:
             def func(arg: InvokeReplyArg):
                 self.events.append({'type': 'invoke-reply', 'name': arg.name, 'value': arg.value})
@@ -20,7 +20,7 @@ class MockSink(IObjectSink):
     def olink_object_name(self) -> str:
         return self.name
 
-    def olink_on_signal(self, name: str, args: list[Any]) -> None:
+    def olink_on_signal(self, name: str, args) -> None:
         self.events.append({'type': 'signal', 'name': name, 'args': args})
 
     def olink_on_property_changed(self, name: str, value: Any) -> None:

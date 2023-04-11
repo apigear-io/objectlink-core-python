@@ -32,7 +32,7 @@ class CounterWebsocketAdapter(IObjectSource):
         # return service name
         return 'demo.Counter'
 
-    def olink_invoke(self, name: str, args: list[Any]) -> Any:
+    def olink_invoke(self, name: str, args) -> Any:
         # handle the remote call from client node
         path = Name.path_from_name(name)
         # get the function from the implementation
