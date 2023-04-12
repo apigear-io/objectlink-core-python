@@ -11,26 +11,28 @@ from olink.remotenode import IObjectSource, RemoteNode
 
 
 class Counter:
-    count = 0
+    count: int
     _node: RemoteNode
+
+    def __init__(self):
+        self.count = 0
 
     def increment(self):
         self.count += 1
         # notify all registered clients
-        RemoteNode.notify_property_change('demo.Counter/count', self.count)
+        if self._node:
+            self._node.notify_property_changed("demo.Counter/count", self.count)
 
 
 class CounterAdapter(IObjectSource):
-    node: RemoteNode = None
+    _node: RemoteNode
 
     def __init__(self, impl):
         self.impl = impl
-        # need to register this source with the registry
-        RemoteNode.register_source(self)
 
     def olink_object_name(self):
         # name this source is registered under
-        return 'demo.Counter'
+        return "demo.Counter"
 
     def olink_invoke(self, name: str, args: list[Any]) -> Any:
         # called on incoming invoke message
@@ -48,7 +50,7 @@ class CounterAdapter(IObjectSource):
         self.impl._node = node
 
     def olink_collect_properties(self) -> object:
-        return {k: getattr(self.impl, k) for k in ['count']}
+        return {k: getattr(self.impl, k) for k in ["count"]}
 
 
 counter = Counter()
@@ -61,26 +63,27 @@ class RemoteEndpoint(WebSocketEndpoint):
     queue = Queue()
 
     async def sender(self, ws):
-        print('start sender')
+        print("start sender")
         while True:
-            print('001')
+            print("001")
             msg = await self.queue.get()
-            print('send', msg)
+            print("send", msg)
             await ws.send_text(msg)
             self.queue.task_done()
 
     async def on_connect(self, ws: WebSocket):
-        print('on_connect')
+        print("on_connect")
         asyncio.create_task(self.sender(ws))
 
         def writer(msg: str):
-            print('writer', msg)
+            print("writer", msg)
             self.queue.put_nowait(msg)
+
         self.node.on_write(writer)
         await super().on_connect(ws)
 
     async def on_receive(self, ws: WebSocket, data: Any) -> None:
-        print('on_receive', data)
+        print("on_receive", data)
         self.node.handle_message(data)
 
     async def on_disconnect(self, websocket: WebSocket, close_code: int) -> None:
@@ -89,8 +92,6 @@ class RemoteEndpoint(WebSocketEndpoint):
         await self.queue.join()
 
 
-routes = [
-    WebSocketRoute("/ws", RemoteEndpoint)
-]
+routes = [WebSocketRoute("/ws", RemoteEndpoint)]
 
 app = Starlette(routes=routes)

@@ -1,14 +1,14 @@
-from olink.core.protocol import Protocol
-from olink.core.node import BaseNode
+from olink.core import BaseNode, Name, Protocol
 from typing import Any
-from .registry import RemoteRegistry, get_remote_registry
+from .registry import RemoteRegistry
 from .types import IObjectSource
 
+
 class RemoteNode(BaseNode):
-    # a remote node is a node that is linked to a remote source
-    def __init__(self):
+    def __init__(self, registry: RemoteRegistry):
         # initialise node and attaches this node to registry
         super().__init__()
+        self._registry = registry
 
     def detach(self):
         # detach this node from registry
@@ -17,9 +17,9 @@ class RemoteNode(BaseNode):
     def handle_link(self, name: str) -> None:
         # handle link message from client node
         # sends init message to client node
-        source = RemoteNode.get_source(name)
+        source = self.get_source(name)
         if source:
-            self.registry().add_node_to_source(name, self)
+            self.registry().add_node(name, self)
             source.olink_linked(name, self)
             props = source.olink_collect_properties()
             self.emit_write(Protocol.init_message(name, props))
@@ -47,32 +47,13 @@ class RemoteNode(BaseNode):
             self.emit_write(Protocol.invoke_reply_message(id, name, value))
 
     def registry(self) -> RemoteRegistry:
-        # returns global registry
-        return get_remote_registry()
+        return self._registry
 
-    @staticmethod
-    def get_source(name) -> IObjectSource:
-        # get object source from registry
-        return get_remote_registry().get_source(name)
+    def get_source(self, name: str) -> IObjectSource:
+        return self.registry().get_source(name)
 
-    @staticmethod
-    def register_source(source: IObjectSource):
-        # add object source to registry
-        return get_remote_registry().add_source(source)
+    def notify_property_changed(self, name: str, value: Any) -> None:
+        self.registry().notify_property_changed(name, value)
 
-    @staticmethod
-    def unregister_source(source: IObjectSource):
-        # remove object source from registry
-        return get_remote_registry().remove_source(source)
-
-    @staticmethod
-    def notify_property_change(name: str, value: Any) -> None:
-        # notify property change to all named client nodes
-        for node in get_remote_registry().get_nodes(name):
-            node.emit_write(Protocol.property_change_message(name, value))
-
-    @staticmethod
-    def notify_signal(name: str, args: list[Any]):
-        # notify signal to all named client nodes
-        for node in get_remote_registry().get_nodes(name):
-            node.emit_write(Protocol.signal_message(name, args))
+    def notify_signal(self, name: str, args: list[Any]) -> None:
+        self.registry().notify_signal(name, args)

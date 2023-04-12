@@ -2,36 +2,45 @@ import asyncio
 import websockets as ws
 from olink.client import ClientNode
 
+
 class Connection:
-    send_queue = asyncio.Queue()
-    recv_queue = asyncio.Queue()
-    node = None
     def __init__(self, node=ClientNode()):
-        self.node = node
+        self._node = node
+        self._send_queue = asyncio.Queue()
+        self._recv_queue = asyncio.Queue()
+        self._conn: ws.WebSocketClientProtocol = None
 
     def send(self, msg):
-        self.send_queue.put_nowait(msg)
+        self._send_queue.put_nowait(msg)
 
     async def handle_send(self):
-        async for msg in self.send_queue:
+        while self._conn is not None:
+            msg = await self._send_queue.get()
             data = self.serializer.serialize(msg)
-            await self.conn.send(data)
+            await self._conn.send(data)
 
     async def handle_recv(self):
-        async for msg in self.recv_queue:
+        while self._conn is not None:
+            msg = await self._recv_queue.get()
             self.emitter.emit(msg.object, msg)
 
     async def recv(self):
-        async for data in self.conn:
+        async for data in self._conn:
             msg = self.serializer.deserialize(data)
-            self.recv_queue.put_nowait(msg)
+            await self._recv_queue.put(msg)
 
     async def connect(self, addr: str):
         # connect to server
         async for conn in ws.connect(addr):
-            self.conn = conn
-            # start send and recv tasks
-            await asyncio.gather(self.handle_send(), self.handle_recv(), self.recv())
-            # wait for all queues to be empty
-            await self.send_queue.join()
-            await self.recv_queue.join()
+            try:
+                self._conn = conn
+                # start send and recv tasks
+                await asyncio.gather(
+                    self.handle_send(), self.handle_recv(), self.recv()
+                )
+            except ws.ConnectionClosed:
+                continue
+
+    def cancel(self):
+        self._conn.close()
+        self._conn = None

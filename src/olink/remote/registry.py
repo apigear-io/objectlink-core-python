@@ -1,25 +1,26 @@
-from olink.core.types import Name, Base, LogLevel
-
+from olink.core import Name, Base, LogLevel, Protocol
+from typing import Any, TYPE_CHECKING
 from .types import IObjectSource
 
-class SourceToNodeEntry:
-    # entry in the remote registry
-    source: IObjectSource = None
-    nodes = set() # type: set["RemoteNode"]
+if TYPE_CHECKING:
+    from .node import RemoteNode
 
+
+class SourceToNodeEntry:
     def __init__(self, source=None):
-        self.source = source
+        self.source: IObjectSource = source
+        self.nodes: set["RemoteNode"] = set()
+
 
 class RemoteRegistry(Base):
-    # registry of remote sources
-    # links sources to nodes
-    entries: dict[str, SourceToNodeEntry] = {}
+    def __init__(self) -> None:
+        super().__init__()
+        self._entries: dict[str, SourceToNodeEntry] = {}
 
     def add_source(self, source: IObjectSource):
-        # add a source to registry by object name
+        # register a new source in the registry
         name = source.olink_object_name()
-        self.emit_log(LogLevel.DEBUG,
-                      f"RemoteRegistry.add_object_source: {name}")
+        self.emit_log(LogLevel.DEBUG, f"RemoteRegistry.add_object_source: {name}")
         self._entry(name).source = source
 
     def remove_source(self, source: IObjectSource):
@@ -38,13 +39,15 @@ class RemoteRegistry(Base):
     def remove_node(self, node: "RemoteNode"):
         # remove the given node from the registry
         self.emit_log(LogLevel.DEBUG, "RemoteRegistry.detach_remote_node")
-        for entry in self.entries.values():
+        for entry in self._entries.values():
             if node in entry.nodes:
                 entry.nodes.remove(node)
 
-    def add_node_to_source(self, name: str, node: "RemoteNode"):
+    def add_node(self, name: str, node: "RemoteNode"):
         # add a node to the named source
-        self._entry(name).nodes.add(node)
+        entry = self._entry(name)
+        if not node in entry.nodes:
+            entry.nodes.add(node)
 
     def remove_node_from_source(self, name: str, node: "RemoteNode"):
         # remove the given node from the named source
@@ -53,39 +56,46 @@ class RemoteRegistry(Base):
     def _entry(self, name: str) -> SourceToNodeEntry:
         # returns the entry for the given resource part of the name
         resource = Name.resource_from_name(name)
-        if not resource in self.entries:
+        if not resource in self._entries:
             self.emit_log(LogLevel.DEBUG, f"add new resource: {resource}")
-            self.entries[resource] = SourceToNodeEntry()
-        return self.entries[resource]
+            self._entries[resource] = SourceToNodeEntry()
+        return self._entries[resource]
 
     def _remove_entry(self, name: str) -> None:
         # remove entry from registry
         resource = Name.resource_from_name(name)
-        if resource in self.entries:
-            del self.entries[resource]
+        if resource in self._entries:
+            del self._entries[resource]
         else:
             self.emit_log(
-                LogLevel.DEBUG, f'remove resource failed, resource not exists: {resource}')
+                LogLevel.DEBUG,
+                f"remove resource failed, resource not exists: {resource}",
+            )
 
     def _has_entry(self, name: str) -> SourceToNodeEntry:
         # checks if the registry has an entry for the given name
         resource = Name.resource_from_name(name)
-        return resource in self.entries
+        return resource in self._entries
 
     def init_entry(self, name: str):
         # init a new entry for the given name
         resource = Name.resource_from_name(name)
-        if resource in self.entries:
-            self.entries[resource] = SourceToNodeEntry()
+        if resource in self._entries:
+            self._entries[resource] = SourceToNodeEntry()
 
     def clear(self):
-        self.entries = {}
+        self._entries.clear()
 
+    def notify_property_changed(self, name: str, value: Any):
+        # notify property change to all named client nodes
+        resource = Name.resource_from_name(name)
+        for node in self.get_nodes(resource):
+            msg = Protocol.property_changed_message(name, value)
+            node.emit_write(msg)
 
-_registry = RemoteRegistry()
-
-
-def get_remote_registry() -> RemoteRegistry:
-    # returns the remote registry
-    return _registry
-
+    def notify_signal(self, name: str, args: tuple):
+        # notify signal to all named client nodes
+        resource = Name.resource_from_name(name)
+        for node in self.get_nodes(resource):
+            msg = Protocol.signal_message(name, args)
+            node.emit_write(msg)

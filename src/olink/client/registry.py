@@ -1,20 +1,21 @@
 from .types import IObjectSink
 from olink.core import Name, Base, LogLevel
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .node import ClientNode
+
 
 class SinkToClientEntry:
-    # entry in the client registry
-    sink: IObjectSink = None
-    node: "ClientNode" = None
-
     def __init__(self, sink=None):
-        self.sink = sink
-        self.node = None
+        self.sink: IObjectSink = sink
+        self.node: "ClientNode" = None
 
 
 class ClientRegistry(Base):
-    # client side registry to link sinks to nodes
-    entries: dict[str, SinkToClientEntry] = {}
+    def __init__(self) -> None:
+        super().__init__()
+        self.entries: dict[str, SinkToClientEntry] = {}
 
     def remove_node(self, node: "ClientNode"):
         # remove node from all sinks
@@ -22,7 +23,7 @@ class ClientRegistry(Base):
             if entry.node is node:
                 entry.node = None
 
-    def add_node_to_sink(self, name: str, node: "ClientNode"):
+    def add_node(self, name: str, node: "ClientNode"):
         # add not to named sink
         self._entry(name).node = node
 
@@ -34,16 +35,16 @@ class ClientRegistry(Base):
                 self.entries[resource].node = None
             else:
                 self.emit_log(
-                    LogLevel.DEBUG, f"unlink node failed, not the same node: {resource}")
+                    LogLevel.DEBUG, f"unlink node failed, not the same node: {resource}"
+                )
 
-    def register_sink(self, sink: IObjectSink) -> "ClientNode":
+    def add_sink(self, sink: IObjectSink) -> "ClientNode":
         # register sink using object name
         name = sink.olink_object_name()
         entry = self._entry(name)
         entry.sink = sink
-        return entry.node
 
-    def unregister_sink(self, sink: IObjectSink):
+    def remove_sink(self, sink: IObjectSink):
         # unregister sink using object name
         name = sink.olink_object_name()
         self._remove_entry(name)
@@ -68,13 +69,3 @@ class ClientRegistry(Base):
         # remove an entry by name
         resource = Name.resource_from_name(name)
         del self.entries[resource]
-
-
-# global client registry
-_registry = ClientRegistry()
-
-
-def get_client_registry() -> ClientRegistry:
-    # get global client registry
-    return _registry
-

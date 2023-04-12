@@ -1,6 +1,4 @@
-from .registry import RemoteRegistry, get_remote_registry
-from .node import RemoteNode
-from .types import IObjectSource
-from .adapter import SourceAdapter
-
-
+from .registry import RemoteRegistry as RemoteRegistry
+from .node import RemoteNode as RemoteNode
+from .types import IObjectSource as IObjectSource
+from .adapter import SourceAdapter as SourceAdapter

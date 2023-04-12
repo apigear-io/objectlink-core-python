@@ -1,37 +1,67 @@
-from olink.clientnode import ClientNode
+from olink.client import ClientNode, ClientRegistry
 from olink.mocks.mocksink import MockSink
+import pytest
 
-name = 'demo.Counter'
-sink = MockSink(name)
-client = ClientNode()
-r = client.registry()
+name = "demo.Counter"
 
 
-def test_add_sink():
-    ClientNode.register_sink(sink)
-    assert(r.get_sink(name) == sink)
-    assert(r.get_node(name) == None)
+@pytest.fixture
+def node():  # type: () -> ClientNode
+    sink = MockSink(name)
+    registry = ClientRegistry()
+    registry.add_sink(sink)
+    node = ClientNode(registry)
+    registry.add_node(name, node)
+    assert registry.get_sink(name) == sink
+    assert registry.get_node(name) == node
+    return node
 
 
-def test_remove_sink():
-    ClientNode.unregister_sink(sink)
-    assert(r.get_sink(name) == None)
+@pytest.fixture
+def registry():  # type: () -> ClientRegistry
+    name = "demo.Counter"
+    sink = MockSink(name)
+    registry = ClientRegistry()
+    registry.add_sink(sink)
+    return registry
 
 
-def test_link_node_to_sink():
-    assert(r.get_node(name) == None)
-    client.link_remote(name)
-    assert(r.get_node(name) == client)
+def test_add_sink(node: ClientNode):
+    name = "demo.Counter"
+    registry = node.registry()
+    sink = registry.get_sink(name)
+    assert registry.get_sink(name) == sink
+    assert registry.get_node(name) == node
+    registry.remove_sink(sink)
+    assert registry.get_sink(name) == None
+    assert registry.get_node(name) == None
 
 
-def test_unlink_node_from_sink():
-    assert(r.get_node(name) == client)
-    client.unlink_remote(name)
-    assert(r.get_node(name) == None)
+def test_remove_sink(node: ClientNode):
+    registry = node.registry()
+    sink = registry.get_sink(name)
+    registry.remove_sink(sink)
+    assert registry.get_sink(name) == None
+    assert registry.get_node(name) == None
 
 
-def test_detach_node_from_all_sinks():
-    client.link_remote(name)
-    assert(r.get_node(name) == client)
-    client.detach()
-    assert(r.get_node(name) == None)
+def test_link_node_to_sink(node: ClientNode):
+    registry = node.registry()
+    assert registry.get_node(name) == node
+    node.link_remote(name)
+    assert registry.get_node(name) == node
+
+
+def test_unlink_node_from_sink(node: ClientNode):
+    registry = node.registry()
+    assert registry.get_node(name) == node
+    node.unlink_remote(name)
+    assert registry.get_node(name) == None
+
+
+def test_detach_node_from_all_sinks(node: ClientNode):
+    registry = node.registry()
+    node.link_remote(name)
+    assert registry.get_node(name) == node
+    node.detach()
+    assert registry.get_node(name) == None
