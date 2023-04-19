@@ -3,6 +3,7 @@ from typing import Any, Callable, Optional
 from olink.core import LogLevel, MsgType, BaseNode, Protocol
 from .types import IObjectSink
 from .registry import ClientRegistry
+import logging
 
 
 class InvokeReplyArg:
@@ -47,6 +48,7 @@ class ClientNode(BaseNode):
 
     def link_node(self, name: str):
         # register this node to sink
+        logging.debug(f"ClientNode.linkNode: {name}")
         self.registry().add_node(name, self)
 
     def unlink_node(self, name: str) -> None:

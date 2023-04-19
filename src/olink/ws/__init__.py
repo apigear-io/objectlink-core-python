@@ -1,2 +1,2 @@
-from .client import Connection
-from .server import Server, run_server
+from .client import Connection as Connection
+from .server import Server as Server, run_server as run_server

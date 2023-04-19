@@ -21,5 +21,6 @@ async def setup_server(
 
 @pytest.mark.asyncio
 async def test_client_link():
+    assert False
     queue = asyncio.Queue()
     await setup_server(queue, test_host, test_port)

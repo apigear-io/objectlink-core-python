@@ -1,0 +1,9 @@
+version: 3
+
+tasks:
+  test::debug:
+    cmds:
+      - pytest -s --log-cli-level=DEBUG ${@:1}
+  test:
+    cmds:
+      - pytest -s --log-cli-level=INFO ${@:1}

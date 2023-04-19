@@ -1,46 +1,58 @@
 import asyncio
-import websockets as ws
+import websockets
 from olink.client import ClientNode
+from olink.core import EventHook
+import logging
 
 
 class Connection:
-    def __init__(self, node=ClientNode()):
+    def __init__(self, cancel: asyncio.Future, node: ClientNode):
+        self._cancel = cancel
         self._node = node
+        self._conn: websockets.WebSocketClientProtocol = None
         self._send_queue = asyncio.Queue()
-        self._recv_queue = asyncio.Queue()
-        self._conn: ws.WebSocketClientProtocol = None
+        self.on_recv = EventHook()
 
-    def send(self, msg):
-        self._send_queue.put_nowait(msg)
+    async def async_send(self, data):
+        await self._conn.send(data)
 
-    async def handle_send(self):
-        while self._conn is not None:
+    def send(self, data):
+        self._send_queue.put_nowait(data)
+
+    async def _sender(self):
+        while True:
             msg = await self._send_queue.get()
-            data = self.serializer.serialize(msg)
-            await self._conn.send(data)
+            if self._cancel.done() and self._send_queue.empty():
+                await self._conn.close()
+                break
+            await self._conn.send(msg)
 
-    async def handle_recv(self):
-        while self._conn is not None:
-            msg = await self._recv_queue.get()
-            self.emitter.emit(msg.object, msg)
+    async def _receiver(self):
+        try:
+            async for data in self._conn:
+                self.on_recv(data)
+        except websockets.ConnectionClosed:
+            pass
 
-    async def recv(self):
-        async for data in self._conn:
-            msg = self.serializer.deserialize(data)
-            await self._recv_queue.put(msg)
-
-    async def connect(self, addr: str):
-        # connect to server
-        async for conn in ws.connect(addr):
-            try:
-                self._conn = conn
-                # start send and recv tasks
-                await asyncio.gather(
-                    self.handle_send(), self.handle_recv(), self.recv()
-                )
-            except ws.ConnectionClosed:
-                continue
+    async def connect(self, addr: str, done: asyncio.Future):
+        async with websockets.connect(addr) as conn:
+            logging.info("client connected")
+            self._conn = conn
+            receiver = asyncio.create_task(self._receiver())
+            sender = asyncio.create_task(self._sender())
+            logging.info("await client receiver, sender")
+            _, pending = await asyncio.wait(
+                [receiver, sender], return_when=asyncio.FIRST_COMPLETED
+            )
+            logging.info("client receiver, sender done")
+            for task in pending:
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
 
     def cancel(self):
+        self._cancel.set_result(True)
         self._conn.close()
         self._conn = None

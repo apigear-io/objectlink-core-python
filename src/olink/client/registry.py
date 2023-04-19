@@ -1,6 +1,7 @@
 from .types import IObjectSink
 from olink.core import Name, Base, LogLevel
 from typing import Optional, TYPE_CHECKING
+import logging
 
 if TYPE_CHECKING:
     from .node import ClientNode
@@ -15,9 +16,11 @@ class SinkToClientEntry:
 class ClientRegistry(Base):
     def __init__(self) -> None:
         super().__init__()
+        logging.debug("ClientRegistry.__init__")
         self.entries: dict[str, SinkToClientEntry] = {}
 
     def remove_node(self, node: "ClientNode"):
+        logging.debug("ClientRegistry.removeNode")
         # remove node from all sinks
         for entry in self.entries.values():
             if entry.node is node:
