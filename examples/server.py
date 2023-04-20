@@ -16,7 +16,7 @@ class CounterService:
 
     def increment(self):
         self.count += 1
-        self._node.notify_property_change('demo.Counter/count', self.count)
+        self._node.notify_property_changed("demo.Counter/count", self.count)
 
 
 class CounterWebsocketAdapter(IObjectSource):
@@ -30,7 +30,7 @@ class CounterWebsocketAdapter(IObjectSource):
 
     def olink_object_name(self):
         # return service name
-        return 'demo.Counter'
+        return "demo.Counter"
 
     def olink_invoke(self, name: str, args: list[Any]) -> Any:
         # handle the remote call from client node
@@ -42,7 +42,7 @@ class CounterWebsocketAdapter(IObjectSource):
             result = func(**args)
         except Exception as e:
             # need to have proper exception handling here
-            print('error: %s' % e)
+            print("error: %s" % e)
             result = None
         # results will be send back to calling client node
         return result
@@ -58,7 +58,7 @@ class CounterWebsocketAdapter(IObjectSource):
 
     def olink_collect_properties(self) -> object:
         # collect properties from implementation to send back to client node initially
-        return {k: getattr(self.impl, k) for k in ['count']}
+        return {k: getattr(self.impl, k) for k in ["count"]}
 
 
 # create the service implementation
@@ -77,23 +77,24 @@ class RemoteEndpoint(WebSocketEndpoint):
 
     async def sender(self, ws):
         # sender coroutine, messages from queue are send to client
-        print('start sender')
+        print("start sender")
         while True:
             msg = await self.queue.get()
-            print('send', msg)
+            print("send", msg)
             await ws.send_text(msg)
             self.queue.task_done()
 
     async def on_connect(self, ws: WebSocket):
         # handle a socket connection
-        print('on_connect')
+        print("on_connect")
         # register a sender to the connection
         asyncio.create_task(self.sender(ws))
 
         # a writer function to queue messages
         def writer(msg: str):
-            print('write to queue:', msg)
+            print("write to queue:", msg)
             self.queue.put_nowait(msg)
+
         # register the writer function to the node
         self.node.on_write(writer)
         # call the super connection handler
@@ -101,7 +102,7 @@ class RemoteEndpoint(WebSocketEndpoint):
 
     async def on_receive(self, ws: WebSocket, data: Any) -> None:
         # handle a message from a client socket
-        print('on_receive', data)
+        print("on_receive", data)
         self.node.handle_message(data)
 
     async def on_disconnect(self, websocket: WebSocket, close_code: int) -> None:
@@ -114,9 +115,7 @@ class RemoteEndpoint(WebSocketEndpoint):
 
 
 # see https://www.starlette.io/routing/
-routes = [
-    WebSocketRoute("/ws", RemoteEndpoint)
-]
+routes = [WebSocketRoute("/ws", RemoteEndpoint)]
 
 
 # call with `uvicorn server:app --port 8282`

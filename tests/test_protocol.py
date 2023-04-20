@@ -1,8 +1,8 @@
 from olink.core.protocol import Protocol
 from olink.core.types import MsgType
 
-name = 'demo.Calc'
-props = {'count':  1}
+name = "demo.Calc"
+props = {"count": 1}
 value = 1
 id = 1
 args = [1, 2]
@@ -23,7 +23,7 @@ def test_messages():
     msg = Protocol.set_property_message(name, value)
     assert msg == [MsgType.SET_PROPERTY, name, value]
 
-    msg = Protocol.property_change_message(name, value)
+    msg = Protocol.property_changed_message(name, value)
     assert msg == [MsgType.PROPERTY_CHANGE, name, value]
 
     msg = Protocol.invoke_message(id, name, args)

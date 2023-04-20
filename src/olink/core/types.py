@@ -1,26 +1,26 @@
 from enum import IntEnum
 from typing import Any, Callable
-from typing import Protocol as ProptocolType
+from typing import Protocol as ProtocolType
 import json
 
 
 class MsgType(IntEnum):
-    LINK = 10,
-    INIT = 11,
-    UNLINK = 12,
-    SET_PROPERTY = 20,
-    PROPERTY_CHANGE = 21,
-    INVOKE = 30,
-    INVOKE_REPLY = 31,
-    SIGNAL = 40,
-    ERROR = 90,
+    LINK = (10,)
+    INIT = (11,)
+    UNLINK = (12,)
+    SET_PROPERTY = (20,)
+    PROPERTY_CHANGE = (21,)
+    INVOKE = (30,)
+    INVOKE_REPLY = (31,)
+    SIGNAL = (40,)
+    ERROR = (90,)
 
 
 class MessageFormat(IntEnum):
-    JSON = 1,
-    BSON = 2,
-    MSGPACK = 3,
-    CBOR = 4,
+    JSON = (1,)
+    BSON = (2,)
+    MSGPACK = (3,)
+    CBOR = (4,)
 
 
 class Name:
@@ -29,30 +29,27 @@ class Name:
     @staticmethod
     def resource_from_name(name: str) -> str:
         # return the resource name from a name
-        return name.split('/')[0]
+        return name.split("/")[0]
 
     @staticmethod
     def path_from_name(name: str) -> str:
         # return the path from a name
-        return name.split('/')[-1]
+        return name.split("/")[-1]
 
     @staticmethod
     def has_path(name: str) -> bool:
         # return true if name has a path
-        return '/' in name
+        return "/" in name
 
     @staticmethod
     def create_name(resource: str, path: str) -> str:
         # create a name from a resource and a path
-        return f'{resource}/{path}'
+        return f"{resource}/{path}"
 
 
 class MessageConverter:
-    # convert a message from/to a string
-    format: MessageFormat = MessageFormat.JSON
-
-    def __init__(self, format: MessageFormat):
-        self.format = format
+    def __init__(self, format: MessageFormat = MessageFormat.JSON):
+        self._format = format
 
     def from_string(self, message: str) -> list[Any]:
         return json.loads(message)
@@ -65,22 +62,23 @@ WriteMessageFunc = Callable[[str], None]
 
 
 class LogLevel:
-    DEBUG = 1,
-    INFO = 2,
-    WARNING = 3,
-    ERROR = 4,
+    DEBUG = (1,)
+    INFO = (2,)
+    WARNING = (3,)
+    ERROR = (4,)
 
 
 WriteLogFunc = Callable[[LogLevel, str], None]
 
 
-class ILogger(ProptocolType):
+class ILogger(ProtocolType):
     def log(level: LogLevel, msg: str) -> None:
         raise NotImplementedError()
 
 
 class Base:
-    log_func: WriteLogFunc = None
+    def __init__(self) -> None:
+        self.log_func: WriteLogFunc = None
 
     def on_log(self, func: WriteLogFunc):
         self.log_func = func

@@ -1,9 +1,9 @@
 from typing import Any
-from typing import Protocol as ProptocolType
+from typing import Protocol as ProtocolType
 from .types import Base, LogLevel, MsgType
 
 
-class IProtocolListener(ProptocolType):
+class IProtocolListener(ProtocolType):
     # interface for protocol listeners
     def handle_link(self, name: str) -> None:
         # called when a link is created
@@ -43,11 +43,9 @@ class IProtocolListener(ProptocolType):
 
 
 class Protocol(Base):
-    listener: IProtocolListener = None
-
     def __init__(self, listener: IProtocolListener):
         super()
-        self.listener = listener
+        self._listener = listener
 
     @staticmethod
     def link_message(name: str) -> list[Any]:
@@ -69,7 +67,7 @@ class Protocol(Base):
         return [MsgType.SET_PROPERTY, name, value]
 
     @staticmethod
-    def property_change_message(name: str, value: Any) -> list[Any]:
+    def property_changed_message(name: str, value: Any) -> list[Any]:
         """signal property change to the client linked to the remote objects"""
         return [MsgType.PROPERTY_CHANGE, name, value]
 
@@ -92,39 +90,38 @@ class Protocol(Base):
         return [MsgType.ERROR, msgType, id, error]
 
     def handle_message(self, msg: list[Any]) -> bool:
-        if not self.listener:
+        if not self._listener:
             self.emit_log(LogLevel.DEBUG, "no listener installed")
             return False
         msgType = msg[0]
         if msgType == MsgType.LINK:
             _, name = msg
-            self.listener.handle_link(name)
+            self._listener.handle_link(name)
         elif msgType == MsgType.INIT:
             _, name, props = msg
-            self.listener.handle_init(name, props)
+            self._listener.handle_init(name, props)
         elif msgType == MsgType.UNLINK:
             _, name = msg
-            self.listener.handle_unlink(name)
+            self._listener.handle_unlink(name)
         elif msgType == MsgType.SET_PROPERTY:
             _, name, value = msg
-            self.listener.handle_set_property(name, value)
+            self._listener.handle_set_property(name, value)
         elif msgType == MsgType.PROPERTY_CHANGE:
             _, name, value = msg
-            self.listener.handle_property_change(name, value)
+            self._listener.handle_property_change(name, value)
         elif msgType == MsgType.INVOKE:
             _, id, name, args = msg
-            self.listener.handle_invoke(id, name, args)
+            self._listener.handle_invoke(id, name, args)
         elif msgType == MsgType.INVOKE_REPLY:
             _, id, name, value = msg
-            self.listener.handle_invoke_reply(id, name, value)
+            self._listener.handle_invoke_reply(id, name, value)
         elif msgType == MsgType.SIGNAL:
             _, name, args = msg
-            self.listener.handle_signal(name, args)
+            self._listener.handle_signal(name, args)
         elif msgType == MsgType.ERROR:
             _, msgType, id, error = msg
-            self.listener.handle_error(msgType, id, error)
+            self._listener.handle_error(msgType, id, error)
         else:
-            self.emit_log(LogLevel.DEBUG,
-                          f"not supported message type: {msgType}")
+            self.emit_log(LogLevel.DEBUG, f"not supported message type: {msgType}")
             return False
         return True
