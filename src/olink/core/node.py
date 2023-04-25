@@ -1,6 +1,13 @@
+import logging
 from typing import Any
 from olink.core.protocol import IProtocolListener, Protocol
-from olink.core.types import Base, LogLevel, MessageConverter, MessageFormat, WriteMessageFunc
+from olink.core.types import (
+    Base,
+    LogLevel,
+    MessageConverter,
+    MessageFormat,
+    WriteMessageFunc,
+)
 
 
 class BaseNode(Base, IProtocolListener):
@@ -28,5 +35,9 @@ class BaseNode(Base, IProtocolListener):
 
     def handle_message(self, data: str) -> None:
         # handle a message and pass is on to the protocol
-        msg = self.converter.from_string(data)
-        self.protocol.handle_message(msg)
+        try:
+            msg = self.converter.from_string(data)
+            self.protocol.handle_message(msg)
+        except Exception as e:
+            logging.error("handle_message error: %s", e)
+            raise e
