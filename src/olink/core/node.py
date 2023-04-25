@@ -39,5 +39,4 @@ class BaseNode(Base, IProtocolListener):
             msg = self.converter.from_string(data)
             self.protocol.handle_message(msg)
         except Exception as e:
-            logging.error("handle_message error: %s", e)
-            raise e
+            self.emit_log(LogLevel.ERROR, f"handle_message error: {e}")
