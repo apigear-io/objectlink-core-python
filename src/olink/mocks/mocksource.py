@@ -2,6 +2,7 @@ from olink.core.types import Name
 from typing import Any
 from olink.remotenode import IObjectSource, RemoteNode
 
+
 class MockSource(IObjectSource):
     name: str
     events: list[Any] = []
@@ -21,12 +22,12 @@ class MockSource(IObjectSource):
         return self.name
 
     def olink_invoke(self, name: str, args: list[Any]):
-        self.events.append({ 'type': 'invole', 'name': name, 'args': args })
+        self.events.append({"type": "invole", "name": name, "args": args})
         return name
 
     def olink_set_property(self, name: str, value: Any):
         path = Name.path_from_name(name)
-        self.events.append({'type': 'set_property', 'name': name, 'value': value})
+        self.events.append({"type": "set_property", "name": name, "value": value})
         if not path in self.properties:
             # assign new value
             self.properties[path] = value
@@ -36,9 +37,9 @@ class MockSource(IObjectSource):
             if not self.properties[path] == value:
                 self.properties[path] = value
                 RemoteNode.notify_property_change(name, value)
-    
+
     def olink_linked(self, name: str, node: RemoteNode):
-        self.events.append({'type': 'linked', 'name': name})
+        self.events.append({"type": "linked", "name": name})
         self.node = node
 
     def olink_collect_properties(self) -> object:

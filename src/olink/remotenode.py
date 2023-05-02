@@ -47,8 +47,7 @@ class RemoteRegistry(Base):
     def add_source(self, source: IObjectSource):
         # add a source to registry by object name
         name = source.olink_object_name()
-        self.emit_log(LogLevel.DEBUG,
-                      f"RemoteRegistry.add_object_source: {name}")
+        self.emit_log(LogLevel.DEBUG, f"RemoteRegistry.add_object_source: {name}")
         self._entry(name).source = source
 
     def remove_source(self, source: IObjectSource):
@@ -94,7 +93,9 @@ class RemoteRegistry(Base):
             del self.entries[resource]
         else:
             self.emit_log(
-                LogLevel.DEBUG, f'remove resource failed, resource not exists: {resource}')
+                LogLevel.DEBUG,
+                f"remove resource failed, resource not exists: {resource}",
+            )
 
     def _has_entry(self, name: str) -> SourceToNodeEntry:
         # checks if the registry has an entry for the given name

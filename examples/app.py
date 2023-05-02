@@ -14,37 +14,37 @@ class CounterSink(IObjectSink):
     def __init__(self):
         # register sink with client node
         self.client = ClientNode.register_sink(self)
-        print('client', self.client)
+        print("client", self.client)
 
     def increment(self):
         # remote call the increment method
         if self.client:
-            self.client.invoke_remote('demo.Counter/increment', [], None)
+            self.client.invoke_remote("demo.Counter/increment", [], None)
 
     def olink_object_name(self):
         # return the name of the sink
-        return 'demo.Counter'
+        return "demo.Counter"
 
     def olink_on_signal(self, name: str, args: list[Any]):
         # handle the incoming signal from the remote source
         path = Name.path_from_name(name)
-        print('on signal: %s: %s' % (path, args))
+        print("on signal: %s: %s" % (path, args))
 
     def olink_on_property_changed(self, name: str, value: Any) -> None:
         # handle the property change from the remote source
         path = Name.path_from_name(name)
-        print('on property changed: %s: %s' % (path, value))
+        print("on property changed: %s: %s" % (path, value))
 
     def olink_on_init(self, name: str, props: object, node: ClientNode):
         # handle the initialization of the sink,
         # called when the sink is linked to remote source
-        print('on init: %s: %s' % (name, props))
+        print("on init: %s: %s" % (name, props))
         self.client = node
 
     def olink_on_release(self):
         # handle the release of the sink,
         # called when the sink is unlinked from remote source
-        print('on release')
+        print("on release")
 
 
 class ClientWebsocketAdapter:
@@ -59,7 +59,7 @@ class ClientWebsocketAdapter:
 
     def writer(self, data):
         # don't send directly, first write to queue
-        print('write to queue')
+        print("write to queue")
         self.queue.put_nowait(data)
 
     async def _reader(self, ws):
@@ -86,20 +86,20 @@ class ClientWebsocketAdapter:
                 await asyncio.gather(sender_task, reader_task)
                 await self.queue.join()
             except Exception as e:
-                print('exception while connecting: ', e)
+                print("exception while connecting: ", e)
 
 
-address = 'ws://localhost:8282/ws'
+address = "ws://localhost:8282/ws"
 # create a client node for ObjectLink registry and protocol
 node = ClientNode()
 # link the node to the service name
-node.link_node('demo.Counter')
+node.link_node("demo.Counter")
 
 # create a ws client which handles the ws adapter
 client = ClientWebsocketAdapter(node)
 
 counter = CounterSink()
-node.link_remote('demo.Counter')
+node.link_remote("demo.Counter")
 counter.increment()
 
 

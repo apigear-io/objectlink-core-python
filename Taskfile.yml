@@ -1,0 +1,12 @@
+version: 3
+
+tasks:
+  install:
+    cmds:
+      - pip install black
+  format:
+    cmds:
+      - black .
+  test:
+    cmds:
+      - pytest

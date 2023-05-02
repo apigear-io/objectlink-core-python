@@ -1,8 +1,8 @@
 from olink.core.protocol import Protocol
 from olink.core.types import MsgType
 
-name = 'demo.Calc'
-props = {'count':  1}
+name = "demo.Calc"
+props = {"count": 1}
 value = 1
 id = 1
 args = [1, 2]

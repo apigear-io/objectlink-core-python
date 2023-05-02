@@ -1,7 +1,7 @@
 from olink.remotenode import RemoteNode, get_remote_registry
 from olink.mocks.mocksource import MockSource
 
-name = 'demo.Counter'
+name = "demo.Counter"
 source = MockSource(name)
 remote = RemoteNode()
 remote_registry = get_remote_registry()
@@ -25,7 +25,7 @@ def test_remove_source():
     RemoteNode.register_source(source)
     assert remote_registry.get_source(name) == source
     RemoteNode.unregister_source(source)
-    assert(remote_registry.get_source(name) == None)
+    assert remote_registry.get_source(name) == None
 
 
 def test_link_node_to_source():

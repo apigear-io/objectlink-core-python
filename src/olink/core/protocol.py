@@ -124,7 +124,6 @@ class Protocol(Base):
             _, msgType, id, error = msg
             self.listener.handle_error(msgType, id, error)
         else:
-            self.emit_log(LogLevel.DEBUG,
-                          f"not supported message type: {msgType}")
+            self.emit_log(LogLevel.DEBUG, f"not supported message type: {msgType}")
             return False
         return True
