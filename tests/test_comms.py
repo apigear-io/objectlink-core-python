@@ -1,7 +1,7 @@
-from olink.clientnode import ClientNode
-from olink.remotenode import RemoteNode
-from olink.mocks.mocksink import MockSink
-from olink.mocks.mocksource import MockSource
+from olink.client import ClientNode
+from olink.remote import RemoteNode
+from olink.mocks import MockSink
+from olink.mocks import MockSource
 
 name = "demo.Calc"
 propName = "demo.Calc/total"

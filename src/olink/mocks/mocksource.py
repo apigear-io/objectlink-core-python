@@ -1,6 +1,6 @@
-from olink.core.types import Name
 from typing import Any
-from olink.remotenode import IObjectSource, RemoteNode
+from olink.core import Name
+from olink.remote import IObjectSource, RemoteNode
 
 
 class MockSource(IObjectSource):

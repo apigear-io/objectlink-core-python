@@ -1,5 +1,5 @@
-from olink.clientnode import ClientNode
-from olink.mocks.mocksink import MockSink
+from olink.client import ClientNode
+from olink.mocks import MockSink
 
 name = "demo.Counter"
 sink = MockSink(name)

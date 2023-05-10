@@ -1,5 +1,4 @@
-from typing import Any
-from typing import Protocol as ProtocolType
+from typing import Any, Protocol as ProtocolType
 from .types import Base, LogLevel, MsgType
 
 

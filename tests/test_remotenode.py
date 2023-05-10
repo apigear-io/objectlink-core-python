@@ -1,4 +1,4 @@
-from olink.remotenode import RemoteNode, get_remote_registry
+from olink.remote import RemoteNode, get_remote_registry
 from olink.mocks.mocksource import MockSource
 
 name = "demo.Counter"
