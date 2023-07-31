@@ -44,7 +44,7 @@ class RemoteNode(BaseNode):
         if source:
             value = source.olink_invoke(name, args)
             # only send reply for not empty values
-            if value:
+            if value != None:
                 self.emit_write(Protocol.invoke_reply_message(id, name, value))
 
     def registry(self) -> RemoteRegistry:
