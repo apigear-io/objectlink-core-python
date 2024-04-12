@@ -42,6 +42,10 @@ class MockSource(IObjectSource):
         self.events.append({"type": "linked", "name": name})
         self.node = node
 
+    def olink_unlinked(self, name: str, node: RemoteNode):
+        self.events.append({"type": "unlinked", "name": name})
+        self.node = None
+
     def olink_collect_properties(self) -> object:
         return self.properties
 

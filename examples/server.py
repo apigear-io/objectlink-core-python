@@ -56,6 +56,10 @@ class CounterWebsocketAdapter(IObjectSource):
         # called when the source is linked to a client node
         self.impl._node = node
 
+    def olink_unlinked(self, name: str):
+        # called when the source is linked to a client node
+        self.impl._node = None
+
     def olink_collect_properties(self) -> object:
         # collect properties from implementation to send back to client node initially
         return {k: getattr(self.impl, k) for k in ["count"]}

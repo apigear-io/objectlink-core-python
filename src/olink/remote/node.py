@@ -27,6 +27,7 @@ class RemoteNode(BaseNode):
         # unlinks names source from registry
         source = self.get_source(name)
         if source:
+            source.olink_unlinked(name, self)
             self.registry().remove_node_from_source(name, self)
 
     def handle_set_property(self, name: str, value: Any):
