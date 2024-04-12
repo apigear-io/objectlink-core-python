@@ -47,6 +47,10 @@ class CounterAdapter(IObjectSource):
         # called when a remote node is linked to this node
         self.impl._node = node
 
+    def olink_unlinked(self, name: str):
+        # called when a remote node is linked to this node
+        self.impl._node = None
+
     def olink_collect_properties(self) -> object:
         return {k: getattr(self.impl, k) for k in ["count"]}
 

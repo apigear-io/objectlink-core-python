@@ -20,6 +20,10 @@ class IObjectSource(ProtocolType):
         # called when a remote node is linked to this node
         raise NotImplementedError()
 
+    def olink_unlinked(self, name: str):
+        # called when a remote node is unlinked from this node
+        raise NotImplementedError()
+
     def olink_collect_properties(self) -> object:
         # returns a dictionary of all properties
         raise NotImplementedError()
