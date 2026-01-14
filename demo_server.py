@@ -41,7 +41,7 @@ class CounterAdapter(IObjectSource):
     def olink_set_property(self, name: str, value: Any):
         # called on incoming set property message
         path = Name.path_from_name(name)
-        setattr(self, self.impl, value)
+        setattr(self.impl, path, value)
 
     def olink_linked(self, name: str, node: "RemoteNode"):
         # called when a remote node is linked to this node
