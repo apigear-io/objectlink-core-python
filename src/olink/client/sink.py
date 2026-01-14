@@ -2,7 +2,7 @@ from typing import Any, Protocol as ProtocolType
 
 class IObjectSink(ProtocolType):
     # interface for object sinks
-    def olink_object_name() -> str:
+    def olink_object_name(self) -> str:
         # return object name
         raise NotImplementedError()
 
