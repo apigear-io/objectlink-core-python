@@ -1,4 +1,5 @@
 from olink.remote import RemoteNode, get_remote_registry
+from olink.remote.registry import RemoteRegistry
 from olink.mocks.mocksource import MockSource
 
 name = "demo.Counter"
@@ -58,3 +59,14 @@ def test_get_registry():
     reset()
     reg = remote.registry()
     assert reg == remote_registry
+
+
+def test_remote_registry_instance_isolation():
+    """Two RemoteRegistry instances should have independent entries"""
+    reg1 = RemoteRegistry()
+    reg2 = RemoteRegistry()
+
+    src = MockSource("test.Object")
+    reg1.add_source(src)
+
+    assert reg2.get_source("test.Object") is None, "reg2 should not see reg1's entries"
