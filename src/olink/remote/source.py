@@ -3,7 +3,7 @@ from typing import Any, Protocol as ProtocolType
 
 class IObjectSource(ProtocolType):
     # interface for object sources
-    def olink_object_name() -> str:
+    def olink_object_name(self) -> str:
         # returns the object name
         raise NotImplementedError()
 
