@@ -17,8 +17,11 @@ InvokeReplyFunc = Callable[[InvokeReplyArg], None]
 
 class ClientNode(BaseNode):
     # client side node
-    invokes_pending: dict[int, InvokeReplyFunc] = {}
-    requestId = 0
+
+    def __init__(self):
+        super().__init__()
+        self.invokes_pending: dict[int, InvokeReplyFunc] = {}
+        self.requestId = 0
 
     def registry(self) -> ClientRegistry:
         return get_client_registry()
