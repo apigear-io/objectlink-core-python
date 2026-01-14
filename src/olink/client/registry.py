@@ -15,7 +15,9 @@ class SinkToClientEntry:
 
 class ClientRegistry(Base):
     # client side registry to link sinks to nodes
-    entries: dict[str, SinkToClientEntry] = {}
+
+    def __init__(self):
+        self.entries: dict[str, SinkToClientEntry] = {}
 
     def remove_node(self, node: "ClientNode"):
         # remove node from all sinks
