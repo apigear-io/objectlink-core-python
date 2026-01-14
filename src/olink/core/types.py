@@ -58,7 +58,7 @@ class MessageConverter:
         return json.loads(message)
 
     def to_string(self, data: list[Any]) -> str:
-        return json.dumps(data)
+        return json.dumps(data, allow_nan=False)
 
 
 WriteMessageFunc = Callable[[str], None]
