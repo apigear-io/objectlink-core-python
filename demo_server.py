@@ -61,8 +61,11 @@ adapter = CounterAdapter(counter)
 
 class RemoteEndpoint(WebSocketEndpoint):
     encoding = "text"
-    node = RemoteNode()
-    queue = Queue()
+
+    def __init__(self, scope, receive, send):
+        super().__init__(scope, receive, send)
+        self.node = RemoteNode()
+        self.queue = Queue()
 
     async def sender(self, ws):
         print("start sender")
