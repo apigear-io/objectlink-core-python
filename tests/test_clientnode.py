@@ -1,4 +1,5 @@
 from olink.client import ClientNode
+from olink.client.registry import ClientRegistry
 from olink.mocks import MockSink
 
 name = "demo.Counter"
@@ -59,3 +60,14 @@ def test_client_node_request_id_isolation():
 
     id2 = node2.next_request_id()
     assert id2 == 1, f"node2 should start at 1, got {id2}"
+
+
+def test_client_registry_instance_isolation():
+    """Two ClientRegistry instances should have independent entries"""
+    reg1 = ClientRegistry()
+    reg2 = ClientRegistry()
+
+    test_sink = MockSink("test.Object")
+    reg1.register_sink(test_sink)
+
+    assert reg2.get_sink("test.Object") is None, "reg2 should not see reg1's entries"
