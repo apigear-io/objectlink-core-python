@@ -1,6 +1,7 @@
 from typing import Any, Optional
+
+from olink.client import ClientNode, InvokeReplyArg, IObjectSink
 from olink.core import Name
-from olink.client import ClientNode, IObjectSink, InvokeReplyArg
 
 
 class MockSink(IObjectSink):
@@ -14,9 +15,7 @@ class MockSink(IObjectSink):
         if self.node:
 
             def func(arg: InvokeReplyArg):
-                self.events.append(
-                    {"type": "invoke-reply", "name": arg.name, "value": arg.value}
-                )
+                self.events.append({"type": "invoke-reply", "name": arg.name, "value": arg.value})
 
             self.node.invoke_remote(name, args, func)
 

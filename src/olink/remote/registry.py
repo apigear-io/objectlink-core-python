@@ -1,5 +1,7 @@
 from olink.core import Base, LogLevel, Name
+
 from .source import IObjectSource
+
 
 class SourceToNodeEntry:
     # entry in the remote registry
@@ -62,7 +64,7 @@ class RemoteRegistry(Base):
     def _entry(self, name: str) -> SourceToNodeEntry:
         # returns the entry for the given resource part of the name
         resource = Name.resource_from_name(name)
-        if not resource in self.entries:
+        if resource not in self.entries:
             self.emit_log(LogLevel.DEBUG, f"add new resource: {resource}")
             self.entries[resource] = SourceToNodeEntry()
         return self.entries[resource]

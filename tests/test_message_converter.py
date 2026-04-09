@@ -1,6 +1,9 @@
 """Tests for MessageConverter to ensure proper handling of special float values."""
+
 import json
+
 import pytest
+
 from olink.core.types import MessageConverter, MessageFormat, MsgType
 
 
@@ -19,7 +22,7 @@ def test_message_converter_rejects_infinity():
     """Test that infinity values raise ValueError."""
     converter = MessageConverter(MessageFormat.JSON)
 
-    data = [MsgType.PROPERTY_CHANGE, "test.Object/prop", {"value": float('inf')}]
+    data = [MsgType.PROPERTY_CHANGE, "test.Object/prop", {"value": float("inf")}]
     with pytest.raises(ValueError):
         converter.to_string(data)
 
@@ -28,7 +31,7 @@ def test_message_converter_rejects_negative_infinity():
     """Test that negative infinity values raise ValueError."""
     converter = MessageConverter(MessageFormat.JSON)
 
-    data = [MsgType.PROPERTY_CHANGE, "test.Object/prop", {"value": float('-inf')}]
+    data = [MsgType.PROPERTY_CHANGE, "test.Object/prop", {"value": float("-inf")}]
     with pytest.raises(ValueError):
         converter.to_string(data)
 
@@ -37,7 +40,7 @@ def test_message_converter_rejects_nan():
     """Test that NaN values raise ValueError."""
     converter = MessageConverter(MessageFormat.JSON)
 
-    data = [MsgType.PROPERTY_CHANGE, "test.Object/prop", {"value": float('nan')}]
+    data = [MsgType.PROPERTY_CHANGE, "test.Object/prop", {"value": float("nan")}]
     with pytest.raises(ValueError):
         converter.to_string(data)
 

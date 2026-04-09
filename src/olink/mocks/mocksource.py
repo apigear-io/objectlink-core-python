@@ -1,4 +1,5 @@
 from typing import Any
+
 from olink.core import Name
 from olink.remote import IObjectSource, RemoteNode
 
@@ -26,7 +27,7 @@ class MockSource(IObjectSource):
     def olink_set_property(self, name: str, value: Any):
         path = Name.path_from_name(name)
         self.events.append({"type": "set_property", "name": name, "value": value})
-        if not path in self.properties:
+        if path not in self.properties:
             # assign new value
             self.properties[path] = value
             RemoteNode.notify_property_change(name, value)

@@ -1,4 +1,6 @@
-from typing import Any, Protocol as ProtocolType
+from typing import Any
+from typing import Protocol as ProtocolType
+
 from .types import Base, LogLevel, MsgType
 
 
@@ -115,8 +117,7 @@ class Protocol(Base):
         if min_len is not None and len(msg) < min_len:
             self.emit_log(
                 LogLevel.ERROR,
-                f"malformed message: type {msgType} requires"
-                f" at least {min_len} elements, got {len(msg)}",
+                f"malformed message: type {msgType} requires at least {min_len} elements, got {len(msg)}",
             )
             return False
         if msgType == MsgType.LINK:

@@ -3,19 +3,21 @@
 Tests for malformed messages, registry edge cases, phantom entry prevention,
 message size limits, and other safety-critical behaviors.
 """
+
 import json
+
 import pytest
-from olink.core.types import MessageConverter, MessageFormat, MsgType, Name
-from olink.core.protocol import Protocol
-from olink.core.node import BaseNode
+
 from olink.client.node import ClientNode
 from olink.client.registry import ClientRegistry
+from olink.core.protocol import Protocol
+from olink.core.types import MessageConverter, MessageFormat, MsgType, Name
+from olink.mocks import MockSink, MockSource
 from olink.remote.node import RemoteNode
 from olink.remote.registry import RemoteRegistry
-from olink.mocks import MockSink, MockSource
-
 
 # --- Malformed message handling (H1) ---
+
 
 class TestMalformedMessages:
     def setup_method(self):
@@ -108,6 +110,7 @@ class TestMalformedMessages:
 
 # --- Registry KeyError prevention (M1, M2) ---
 
+
 class TestRegistryKeyErrors:
     def test_client_unregister_nonexistent_sink(self):
         """Unregistering a sink that was never registered should not crash."""
@@ -136,6 +139,7 @@ class TestRegistryKeyErrors:
 
 
 # --- Phantom entry prevention (M3) ---
+
 
 class TestPhantomEntryPrevention:
     def test_get_source_nonexistent_no_phantom(self):
@@ -177,6 +181,7 @@ class TestPhantomEntryPrevention:
 
 # --- Message size limit (M5) ---
 
+
 class TestMessageSizeLimit:
     def test_oversized_message_rejected(self):
         """Messages exceeding max size should raise ValueError."""
@@ -200,6 +205,7 @@ class TestMessageSizeLimit:
 
 # --- Exception handling (H6) ---
 
+
 class TestExceptionHandling:
     def test_json_decode_error_caught(self):
         """Invalid JSON should be caught as JSONDecodeError."""
@@ -222,6 +228,7 @@ class TestExceptionHandling:
 
 
 # --- Name utility edge cases (M4) ---
+
 
 class TestNameUtility:
     def test_resource_from_name_no_slash(self):

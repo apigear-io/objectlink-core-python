@@ -1,4 +1,6 @@
-from typing import Any, Protocol as ProtocolType
+from typing import Any
+from typing import Protocol as ProtocolType
+
 
 class IObjectSink(ProtocolType):
     # interface for object sinks
