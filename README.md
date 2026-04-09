@@ -1,8 +1,7 @@
 # ObjectLink Core Python
 
 [![CI](https://github.com/apigear-io/objectlink-core-python/actions/workflows/ci.yml/badge.svg)](https://github.com/apigear-io/objectlink-core-python/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/olink-core)](https://pypi.org/project/olink-core/)
-[![Python](https://img.shields.io/pypi/pyversions/olink-core)](https://pypi.org/project/olink-core/)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://github.com/apigear-io/objectlink-core-python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A transport-agnostic protocol library for remote object communication in Python.
@@ -21,8 +20,10 @@ Part of the [ApiGear](https://apigear.io) ecosystem.
 
 ## Installation
 
+Install directly from GitHub:
+
 ```bash
-pip install olink-core
+pip install git+https://github.com/apigear-io/objectlink-core-python.git
 ```
 
 Requires Python 3.9 or later.
