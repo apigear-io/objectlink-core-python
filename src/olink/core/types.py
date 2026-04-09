@@ -1,26 +1,26 @@
 from enum import IntEnum
 from typing import Any, Callable
-from typing import Protocol as ProptocolType
+from typing import Protocol as ProtocolType
 import json
 
 
 class MsgType(IntEnum):
-    LINK = (10,)
-    INIT = (11,)
-    UNLINK = (12,)
-    SET_PROPERTY = (20,)
-    PROPERTY_CHANGE = (21,)
-    INVOKE = (30,)
-    INVOKE_REPLY = (31,)
-    SIGNAL = (40,)
-    ERROR = (90,)
+    LINK = 10
+    INIT = 11
+    UNLINK = 12
+    SET_PROPERTY = 20
+    PROPERTY_CHANGE = 21
+    INVOKE = 30
+    INVOKE_REPLY = 31
+    SIGNAL = 40
+    ERROR = 90
 
 
 class MessageFormat(IntEnum):
-    JSON = (1,)
-    BSON = (2,)
-    MSGPACK = (3,)
-    CBOR = (4,)
+    JSON = 1
+    BSON = 2
+    MSGPACK = 3
+    CBOR = 4
 
 
 class Name:
@@ -50,11 +50,15 @@ class Name:
 class MessageConverter:
     # convert a message from/to a string
     format: MessageFormat = MessageFormat.JSON
+    max_message_size: int = 1024 * 1024  # 1MB default
 
-    def __init__(self, format: MessageFormat):
+    def __init__(self, format: MessageFormat, max_message_size: int = 1024 * 1024):
         self.format = format
+        self.max_message_size = max_message_size
 
     def from_string(self, message: str) -> list[Any]:
+        if len(message) > self.max_message_size:
+            raise ValueError(f"message size {len(message)} exceeds maximum {self.max_message_size}")
         return json.loads(message)
 
     def to_string(self, data: list[Any]) -> str:
@@ -65,17 +69,17 @@ WriteMessageFunc = Callable[[str], None]
 
 
 class LogLevel:
-    DEBUG = (1,)
-    INFO = (2,)
-    WARNING = (3,)
-    ERROR = (4,)
+    DEBUG = 1
+    INFO = 2
+    WARNING = 3
+    ERROR = 4
 
 
 WriteLogFunc = Callable[[LogLevel, str], None]
 
 
-class ILogger(ProptocolType):
-    def log(level: LogLevel, msg: str) -> None:
+class ILogger(ProtocolType):
+    def log(self, level: LogLevel, msg: str) -> None:
         raise NotImplementedError()
 
 

@@ -7,7 +7,7 @@ from starlette.routing import WebSocketRoute
 from starlette.websockets import WebSocket
 
 from olink.core.types import Name
-from olink.remotenode import IObjectSource, RemoteNode
+from olink.remote import IObjectSource, RemoteNode
 
 
 class CounterService:
@@ -25,6 +25,8 @@ class CounterWebsocketAdapter(IObjectSource):
 
     def __init__(self, impl):
         self.impl = impl
+        self._methods = {"increment": impl.increment}
+        self._properties = {"count": lambda v: setattr(impl, "count", v)}
         # register the source with the node registry
         RemoteNode.register_source(self)
 
@@ -35,22 +37,17 @@ class CounterWebsocketAdapter(IObjectSource):
     def olink_invoke(self, name: str, args: list[Any]) -> Any:
         # handle the remote call from client node
         path = Name.path_from_name(name)
-        # get the function from the implementation
-        func = getattr(self.impl, path)
-        try:
-            # call function with arguments from the implementation
-            result = func(**args)
-        except Exception as e:
-            # need to have proper exception handling here
-            print("error: %s" % e)
-            result = None
-        # results will be send back to calling client node
-        return result
+        func = self._methods.get(path)
+        if func is None:
+            return None
+        return func(*args)
 
     def olink_set_property(self, name: str, value: Any):
         # set property value on implementation
         path = Name.path_from_name(name)
-        setattr(self, self.impl, value)
+        setter = self._properties.get(path)
+        if setter is not None:
+            setter(value)
 
     def olink_linked(self, name: str, node: "RemoteNode"):
         # called when the source is linked to a client node
@@ -75,9 +72,11 @@ adapter = CounterWebsocketAdapter(counter)
 class RemoteEndpoint(WebSocketEndpoint):
     # endpoint to handle a client connection
     encoding = "text"
-    node = RemoteNode()
-    # message queue
-    queue = Queue()
+
+    def __init__(self, scope, receive, send):
+        super().__init__(scope, receive, send)
+        self.node = RemoteNode()
+        self.queue = Queue()
 
     async def sender(self, ws):
         # sender coroutine, messages from queue are send to client
@@ -92,7 +91,7 @@ class RemoteEndpoint(WebSocketEndpoint):
         # handle a socket connection
         print("on_connect")
         # register a sender to the connection
-        asyncio.create_task(self.sender(ws))
+        self._sender_task = asyncio.create_task(self.sender(ws))
 
         # a writer function to queue messages
         def writer(msg: str):
@@ -114,8 +113,12 @@ class RemoteEndpoint(WebSocketEndpoint):
         await super().on_disconnect(websocket, close_code)
         # remove the writer from the node
         self.node.on_write(None)
-        # wait for all messages to be send, before closing the connection
-        await self.queue.join()
+        # cancel the sender task to avoid deadlock
+        self._sender_task.cancel()
+        try:
+            await self._sender_task
+        except asyncio.CancelledError:
+            pass
 
 
 # see https://www.starlette.io/routing/

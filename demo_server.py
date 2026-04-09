@@ -7,7 +7,7 @@ from starlette.routing import WebSocketRoute
 from starlette.websockets import WebSocket
 
 from olink.core.types import Name
-from olink.remotenode import IObjectSource, RemoteNode
+from olink.remote import IObjectSource, RemoteNode
 
 
 class Counter:
@@ -25,6 +25,8 @@ class CounterAdapter(IObjectSource):
 
     def __init__(self, impl):
         self.impl = impl
+        self._methods = {"increment": impl.increment}
+        self._properties = {"count": lambda v: setattr(impl, "count", v)}
         # need to register this source with the registry
         RemoteNode.register_source(self)
 
@@ -35,13 +37,17 @@ class CounterAdapter(IObjectSource):
     def olink_invoke(self, name: str, args: list[Any]) -> Any:
         # called on incoming invoke message
         path = Name.path_from_name(name)
-        func = getattr(self.impl, path)
-        func()
+        func = self._methods.get(path)
+        if func is None:
+            return None
+        return func(*args)
 
     def olink_set_property(self, name: str, value: Any):
         # called on incoming set property message
         path = Name.path_from_name(name)
-        setattr(self.impl, path, value)
+        setter = self._properties.get(path)
+        if setter is not None:
+            setter(value)
 
     def olink_linked(self, name: str, node: "RemoteNode"):
         # called when a remote node is linked to this node
@@ -70,7 +76,6 @@ class RemoteEndpoint(WebSocketEndpoint):
     async def sender(self, ws):
         print("start sender")
         while True:
-            print("001")
             msg = await self.queue.get()
             print("send", msg)
             await ws.send_text(msg)
@@ -78,7 +83,7 @@ class RemoteEndpoint(WebSocketEndpoint):
 
     async def on_connect(self, ws: WebSocket):
         print("on_connect")
-        asyncio.create_task(self.sender(ws))
+        self._sender_task = asyncio.create_task(self.sender(ws))
 
         def writer(msg: str):
             print("writer", msg)
@@ -94,7 +99,11 @@ class RemoteEndpoint(WebSocketEndpoint):
     async def on_disconnect(self, websocket: WebSocket, close_code: int) -> None:
         await super().on_disconnect(websocket, close_code)
         self.node.on_write(None)
-        await self.queue.join()
+        self._sender_task.cancel()
+        try:
+            await self._sender_task
+        except asyncio.CancelledError:
+            pass
 
 
 routes = [WebSocketRoute("/ws", RemoteEndpoint)]

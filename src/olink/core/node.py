@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any
 from olink.core.protocol import IProtocolListener, Protocol
@@ -21,6 +22,11 @@ class BaseNode(Base, IProtocolListener):
         self.protocol = Protocol(self)
         self.converter = MessageConverter(MessageFormat.JSON)
 
+    def on_log(self, func) -> None:
+        # set the log function on both node and protocol
+        self.log_func = func
+        self.protocol.on_log(func)
+
     def on_write(self, func: WriteMessageFunc) -> None:
         # set the write function
         self.write_func = func
@@ -34,9 +40,9 @@ class BaseNode(Base, IProtocolListener):
             self.emit_log(LogLevel.DEBUG, f"write not set on protocol: {msg}")
 
     def handle_message(self, data: str) -> None:
-        # handle a message and pass is on to the protocol
+        # handle a message and pass it on to the protocol
         try:
             msg = self.converter.from_string(data)
             self.protocol.handle_message(msg)
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             self.emit_log(LogLevel.ERROR, f"handle_message error: {e}")
