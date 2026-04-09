@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   test:
@@ -28,31 +27,12 @@ jobs:
           pip install pytest
           pytest --tb=short -q
 
-  publish:
-    name: Publish to PyPI
-    needs: test
-    runs-on: ubuntu-latest
-    environment: release
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Install build tools
-        run: pip install build
-
-      - name: Build package
-        run: python -m build
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+  # TODO: Add PyPI publish step once trusted publisher is configured on pypi.org
+  # See: https://docs.pypi.org/trusted-publishers/adding-a-publisher/
 
   github-release:
     name: Create GitHub Release
-    needs: publish
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
