@@ -90,38 +90,53 @@ class Protocol(Base):
     def error_message(msgType: MsgType, id: int, error: str) -> list[Any]:
         return [MsgType.ERROR, msgType, id, error]
 
+    # Minimum required element counts per message type (use >= for forward-compat)
+    _MIN_LENGTHS = {
+        MsgType.LINK: 2,
+        MsgType.UNLINK: 2,
+        MsgType.INIT: 3,
+        MsgType.SET_PROPERTY: 3,
+        MsgType.PROPERTY_CHANGE: 3,
+        MsgType.SIGNAL: 3,
+        MsgType.INVOKE: 4,
+        MsgType.INVOKE_REPLY: 4,
+        MsgType.ERROR: 4,
+    }
+
     def handle_message(self, msg: list[Any]) -> bool:
         if not self.listener:
             self.emit_log(LogLevel.DEBUG, "no listener installed")
             return False
+        if not isinstance(msg, list) or len(msg) < 1:
+            self.emit_log(LogLevel.ERROR, "invalid message: expected non-empty list")
+            return False
         msgType = msg[0]
+        min_len = self._MIN_LENGTHS.get(msgType)
+        if min_len is not None and len(msg) < min_len:
+            self.emit_log(
+                LogLevel.ERROR,
+                f"malformed message: type {msgType} requires"
+                f" at least {min_len} elements, got {len(msg)}",
+            )
+            return False
         if msgType == MsgType.LINK:
-            _, name = msg
-            self.listener.handle_link(name)
+            self.listener.handle_link(msg[1])
         elif msgType == MsgType.INIT:
-            _, name, props = msg
-            self.listener.handle_init(name, props)
+            self.listener.handle_init(msg[1], msg[2])
         elif msgType == MsgType.UNLINK:
-            _, name = msg
-            self.listener.handle_unlink(name)
+            self.listener.handle_unlink(msg[1])
         elif msgType == MsgType.SET_PROPERTY:
-            _, name, value = msg
-            self.listener.handle_set_property(name, value)
+            self.listener.handle_set_property(msg[1], msg[2])
         elif msgType == MsgType.PROPERTY_CHANGE:
-            _, name, value = msg
-            self.listener.handle_property_change(name, value)
+            self.listener.handle_property_change(msg[1], msg[2])
         elif msgType == MsgType.INVOKE:
-            _, id, name, args = msg
-            self.listener.handle_invoke(id, name, args)
+            self.listener.handle_invoke(msg[1], msg[2], msg[3])
         elif msgType == MsgType.INVOKE_REPLY:
-            _, id, name, value = msg
-            self.listener.handle_invoke_reply(id, name, value)
+            self.listener.handle_invoke_reply(msg[1], msg[2], msg[3])
         elif msgType == MsgType.SIGNAL:
-            _, name, args = msg
-            self.listener.handle_signal(name, args)
+            self.listener.handle_signal(msg[1], msg[2])
         elif msgType == MsgType.ERROR:
-            _, msgType, id, error = msg
-            self.listener.handle_error(msgType, id, error)
+            self.listener.handle_error(msg[1], msg[2], msg[3])
         else:
             self.emit_log(LogLevel.DEBUG, f"not supported message type: {msgType}")
             return False

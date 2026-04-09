@@ -15,7 +15,10 @@ def test_counter_adapter_set_property():
 
     # Bypass __init__ to avoid registration side effects
     adapter = CounterAdapter.__new__(CounterAdapter)
-    adapter.impl = TestCounter()
+    impl = TestCounter()
+    adapter.impl = impl
+    adapter._methods = {"increment": impl.increment}
+    adapter._properties = {"count": lambda v: setattr(impl, "count", v)}
 
     adapter.olink_set_property("demo.Counter/count", 42)
     assert adapter.impl.count == 42, f"Expected 42, got {adapter.impl.count}"

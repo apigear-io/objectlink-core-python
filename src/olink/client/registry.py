@@ -54,11 +54,18 @@ class ClientRegistry(Base):
 
     def get_sink(self, name: str) -> Optional[IObjectSink]:
         # get sink using name
-        return self._entry(name).sink
+        entry = self._get_entry(name)
+        return entry.sink if entry else None
 
     def get_node(self, name: str) -> Optional["ClientNode"]:
         # get node using name
-        return self._entry(name).node
+        entry = self._get_entry(name)
+        return entry.node if entry else None
+
+    def _get_entry(self, name: str) -> Optional[SinkToClientEntry]:
+        # get an entry by name, or None if not found
+        resource = Name.resource_from_name(name)
+        return self.entries.get(resource)
 
     def _entry(self, name: str) -> SinkToClientEntry:
         # get an entry by name
@@ -71,7 +78,13 @@ class ClientRegistry(Base):
     def _remove_entry(self, name: str) -> None:
         # remove an entry by name
         resource = Name.resource_from_name(name)
-        del self.entries[resource]
+        if resource in self.entries:
+            del self.entries[resource]
+        else:
+            self.emit_log(
+                LogLevel.DEBUG,
+                f"remove resource failed, resource not exists: {resource}",
+            )
 
 
 # global client registry

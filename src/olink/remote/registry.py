@@ -4,7 +4,6 @@ from .source import IObjectSource
 class SourceToNodeEntry:
     # entry in the remote registry
     source: IObjectSource = None
-    nodes: set["RemoteNode"] = set()
 
     def __init__(self, source=None):
         self.source = source
@@ -31,18 +30,19 @@ class RemoteRegistry(Base):
 
     def get_source(self, name: str):
         # return the source for the given name
-        return self._entry(name).source
+        entry = self._get_entry(name)
+        return entry.source if entry else None
 
     def get_nodes(self, name: str):
         # return nodes attached to the named source
-        return self._entry(name).nodes
+        entry = self._get_entry(name)
+        return entry.nodes if entry else set()
 
     def remove_node(self, node: "RemoteNode"):
         # remove the given node from the registry
         self.emit_log(LogLevel.DEBUG, "RemoteRegistry.detach_remote_node")
         for entry in self.entries.values():
-            if node in entry.nodes:
-                entry.nodes.remove(node)
+            entry.nodes.discard(node)
 
     def add_node_to_source(self, name: str, node: "RemoteNode"):
         # add a node to the named source
@@ -50,7 +50,14 @@ class RemoteRegistry(Base):
 
     def remove_node_from_source(self, name: str, node: "RemoteNode"):
         # remove the given node from the named source
-        self._entry(name).nodes.remove(node)
+        entry = self._get_entry(name)
+        if entry:
+            entry.nodes.discard(node)
+
+    def _get_entry(self, name: str):
+        # returns the entry for the given name, or None if not found
+        resource = Name.resource_from_name(name)
+        return self.entries.get(resource)
 
     def _entry(self, name: str) -> SourceToNodeEntry:
         # returns the entry for the given resource part of the name
