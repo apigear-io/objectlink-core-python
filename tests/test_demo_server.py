@@ -14,6 +14,9 @@ def test_counter_adapter_set_property():
     class TestCounter:
         count = 0
 
+        def increment(self):
+            self.count += 1
+
     # Bypass __init__ to avoid registration side effects
     adapter = CounterAdapter.__new__(CounterAdapter)
     impl = TestCounter()
