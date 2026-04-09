@@ -1,8 +1,10 @@
+from typing import Any, Callable, Optional
 
-from typing import Any, Optional, Callable
-from olink.core import LogLevel, MsgType, BaseNode, Protocol
+from olink.core import BaseNode, LogLevel, MsgType, Protocol
+
 from .registry import ClientRegistry, get_client_registry
 from .sink import IObjectSink
+
 
 class InvokeReplyArg:
     def __init__(self, name: str, value: Any):
@@ -14,6 +16,7 @@ class InvokeReplyArg:
 
 
 InvokeReplyFunc = Callable[[InvokeReplyArg], None]
+
 
 class ClientNode(BaseNode):
     # client side node
@@ -33,9 +36,7 @@ class ClientNode(BaseNode):
         self.requestId += 1
         return self.requestId
 
-    def invoke_remote(
-        self, name: str, args: list[Any], func: Optional[InvokeReplyFunc]
-    ) -> None:
+    def invoke_remote(self, name: str, args: list[Any], func: Optional[InvokeReplyFunc]) -> None:
         self.emit_log(LogLevel.DEBUG, f"ClientNode.invoke_remote: {name} {args}")
         request_id = self.next_request_id()
         if func:
@@ -98,9 +99,7 @@ class ClientNode(BaseNode):
 
     def handle_invoke_reply(self, id: int, name: str, value: Any) -> None:
         # handle invoke reply message from source
-        self.emit_log(
-            LogLevel.DEBUG, f"ClientNode.handle_invoke_reply: {id} {name} {value}"
-        )
+        self.emit_log(LogLevel.DEBUG, f"ClientNode.handle_invoke_reply: {id} {name} {value}")
         if id in self.invokes_pending:
             func = self.invokes_pending[id]
             if func:
@@ -119,6 +118,4 @@ class ClientNode(BaseNode):
 
     def handle_error(self, msgType: MsgType, id: int, error: str):
         # handle error message from source
-        self.emit_log(
-            LogLevel.DEBUG, f"ClientNode.handle_error: {msgType} {id} {error}"
-        )
+        self.emit_log(LogLevel.DEBUG, f"ClientNode.handle_error: {msgType} {id} {error}")

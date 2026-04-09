@@ -1,9 +1,11 @@
+import asyncio
 from asyncio.queues import Queue
 from typing import Any
-from olink.core.types import Name
-from olink.clientnode import IObjectSink, ClientNode
-import asyncio
+
 import websockets
+from olink.clientnode import ClientNode, IObjectSink
+
+from olink.core.types import Name
 
 
 class CounterSink(IObjectSink):
@@ -28,17 +30,17 @@ class CounterSink(IObjectSink):
     def olink_on_signal(self, name: str, args: list[Any]):
         # handle the incoming signal from the remote source
         path = Name.path_from_name(name)
-        print("on signal: %s: %s" % (path, args))
+        print(f"on signal: {path}: {args}")
 
     def olink_on_property_changed(self, name: str, value: Any) -> None:
         # handle the property change from the remote source
         path = Name.path_from_name(name)
-        print("on property changed: %s: %s" % (path, value))
+        print(f"on property changed: {path}: {value}")
 
     def olink_on_init(self, name: str, props: object, node: ClientNode):
         # handle the initialization of the sink,
         # called when the sink is linked to remote source
-        print("on init: %s: %s" % (name, props))
+        print(f"on init: {name}: {props}")
         self.client = node
 
     def olink_on_release(self):

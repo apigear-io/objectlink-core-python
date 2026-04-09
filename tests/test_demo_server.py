@@ -10,6 +10,7 @@ from demo_server import CounterAdapter
 
 def test_counter_adapter_set_property():
     """olink_set_property should set property on impl object"""
+
     class TestCounter:
         count = 0
 
@@ -26,8 +27,9 @@ def test_counter_adapter_set_property():
 
 def test_remote_endpoint_instance_isolation():
     """Two RemoteEndpoint instances should have independent node and queue"""
-    from demo_server import RemoteEndpoint
     from unittest.mock import MagicMock
+
+    from demo_server import RemoteEndpoint
 
     scope1 = {"type": "websocket"}
     scope2 = {"type": "websocket"}

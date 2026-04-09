@@ -1,5 +1,7 @@
 from typing import Optional
-from olink.core import LogLevel, Base, Name
+
+from olink.core import Base, LogLevel, Name
+
 from .sink import IObjectSink
 
 
@@ -36,9 +38,7 @@ class ClientRegistry(Base):
             if self.entries[resource].node is node:
                 self.entries[resource].node = None
             else:
-                self.emit_log(
-                    LogLevel.DEBUG, f"unlink node failed, not the same node: {resource}"
-                )
+                self.emit_log(LogLevel.DEBUG, f"unlink node failed, not the same node: {resource}")
 
     def register_sink(self, sink: IObjectSink) -> "ClientNode":
         # register sink using object name
@@ -70,7 +70,7 @@ class ClientRegistry(Base):
     def _entry(self, name: str) -> SinkToClientEntry:
         # get an entry by name
         resource = Name.resource_from_name(name)
-        if not resource in self.entries:
+        if resource not in self.entries:
             self.emit_log(LogLevel.DEBUG, f"add new resource: {resource}")
             self.entries[resource] = SinkToClientEntry()
         return self.entries[resource]
@@ -94,5 +94,3 @@ _registry = ClientRegistry()
 def get_client_registry() -> ClientRegistry:
     # get global client registry
     return _registry
-
-

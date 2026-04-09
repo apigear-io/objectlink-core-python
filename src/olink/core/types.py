@@ -1,7 +1,7 @@
+import json
 from enum import IntEnum
 from typing import Any, Callable
 from typing import Protocol as ProtocolType
-import json
 
 
 class MsgType(IntEnum):

@@ -1,6 +1,6 @@
 import json
-import logging
 from typing import Any
+
 from olink.core.protocol import IProtocolListener, Protocol
 from olink.core.types import (
     Base,

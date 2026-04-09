@@ -1,7 +1,6 @@
 from olink.client import ClientNode
+from olink.mocks import MockSink, MockSource
 from olink.remote import RemoteNode
-from olink.mocks import MockSink
-from olink.mocks import MockSource
 
 name = "demo.Calc"
 propName = "demo.Calc/total"
@@ -28,7 +27,7 @@ def reset():
 
 def test_client_link():
     client.detach()
-    assert client.registry().get_node(name) == None
+    assert client.registry().get_node(name) is None
     client.link_remote(name)
     assert client.registry().get_node(name) == client
     assert len(sink.events) == 1

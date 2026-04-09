@@ -1,7 +1,10 @@
 from typing import Any
-from olink.core import Protocol, BaseNode
+
+from olink.core import BaseNode, Protocol
+
 from .registry import RemoteRegistry, get_remote_registry
 from .source import IObjectSource
+
 
 class RemoteNode(BaseNode):
     # a remote node is a node that is linked to a remote source

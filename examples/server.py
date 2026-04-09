@@ -1,6 +1,7 @@
 import asyncio
-from typing import Any
 from asyncio.queues import Queue
+from typing import Any
+
 from starlette.applications import Starlette
 from starlette.endpoints import WebSocketEndpoint
 from starlette.routing import WebSocketRoute
