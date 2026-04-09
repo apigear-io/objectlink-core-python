@@ -3,10 +3,21 @@ version: 3
 tasks:
   install:
     cmds:
-      - pip install black
+      - pip install -e ".[dev]"
+  lint:
+    cmds:
+      - ruff check .
   format:
     cmds:
-      - black .
+      - ruff format .
+  format:check:
+    cmds:
+      - ruff format --check .
   test:
     cmds:
       - pytest
+  ci:
+    cmds:
+      - task: lint
+      - task: format:check
+      - task: test
