@@ -1,6 +1,22 @@
+[project]
+name = "olink-core"
+version = "0.4.0"
+description = "ObjectLink core protocol for Python"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+    {name = "ApiGear UG"},
+    {name = "Epic Games, Inc."},
+]
+
+[project.urls]
+Homepage = "https://github.com/apigear-io/objectlink-core-python"
+"Bug Tracker" = "https://github.com/apigear-io/objectlink-core-python/issues"
+
 [build-system]
 requires = [
-    "setuptools>=42",
+    "setuptools>=61.0",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
